@@ -6,7 +6,9 @@ Date: 2016-12-30
 Author: Kieran Campbell
 Maintainer: Kieran Campbell <kieranrcampbell@gmail.com>
 Description: One paragraph description of what the package does as one
-        or more full sentences.
+    or more full sentences.
 License: GPL (>= 2)
-Imports: Rcpp (>= 0.12.8)
-LinkingTo: Rcpp
+Imports:
+    Rcpp (>= 0.12.8)
+LinkingTo: Rcpp, BH
+RoxygenNote: 5.0.1

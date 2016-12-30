@@ -1,7 +1,38 @@
 library(Rcpp)
 
 
-
+#' Fit a CLVM Model
+#' 
+#' Fit a covariate latent variable model using coordinate ascent
+#' variational inference
+#' 
+#' @param y A N-by-G (dynamic) input matrix 
+#' @param x A N-by-P (static) input matrix
+#' @param maxiter Maximum number of CAVI iterations
+#' @param elbo_tol The (percent) change in the ELBO below which it is 
+#' considered converged
+#' @param thin The number of iterations to wait each time before
+#' re-calculating the elbo
+#' @param verbose Print convergence messages
+#' @param tau_q Hyperparameter tau_q
+#' @param tau_mu Hyperparameter tau_mu
+#' @param tau_c Hyperparameter tau_c
+#' @param a Hyperparameter a
+#' @param b Hyperparameter b
+#' @param tau_alpha Hyperparameter tau_alpha
+#' @param a_beta Hyperparameter a_beta
+#' @param b_beta Hyperparameter b_beta
+#' @param a_tau Hyperparameter a_tau
+#' @param b_tau Hyperparameter b_tau
+#' @param q Priors on the latent variables
+#' 
+#' @return 
+#' A list whose entries correspond to the converged values of the
+#' variational parameters along with the ELBO.
+#' 
+#' @useDynLib clvm
+#' 
+#' @export
 clvm <- function(y, x, maxiter = 1e4,
                            elbo_tol = 0.001,
                            thin = 10,
