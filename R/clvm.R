@@ -4,7 +4,7 @@ library(Rcpp)
 #' Fit a CLVM Model
 #' 
 #' Fit a covariate latent variable model using coordinate ascent
-#' variational inference
+#' variational inference.
 #' 
 #' @param y A N-by-G (dynamic) input matrix 
 #' @param x A N-by-P (static) input matrix
@@ -22,8 +22,6 @@ library(Rcpp)
 #' @param tau_alpha Hyperparameter tau_alpha
 #' @param a_beta Hyperparameter a_beta
 #' @param b_beta Hyperparameter b_beta
-#' @param a_tau Hyperparameter a_tau
-#' @param b_tau Hyperparameter b_tau
 #' @param q Priors on the latent variables
 #' 
 #' @return 
@@ -32,18 +30,18 @@ library(Rcpp)
 #' 
 #' @useDynLib clvm
 #' 
+#' 
 #' @export
 clvm <- function(y, x, maxiter = 1e4,
-                           elbo_tol = 0.001,
-                           thin = 10,
+                           elbo_tol = 0.005,
+                           thin = 1,
                            verbose = TRUE,
                            tau_q = 1,
                            tau_mu = 1,
                            tau_c = 1,
                            a = 2, b = 2,
                            tau_alpha = 1,
-                           a_beta = 6, b_beta = 0.1,
-                           a_tau = 2, b_tau = 0.5,
+                           a_beta = 1e-2, b_beta = 1e-2,
                            q = rep(0, nrow(y))) {
 
   N <- nrow(y)

@@ -52,6 +52,6 @@ variational parameters along with the ELBO.
 }
 \description{
 Fit a covariate latent variable model using coordinate ascent
-variational inference
+variational inference.
 }
 
