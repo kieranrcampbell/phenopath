@@ -4,10 +4,9 @@
 \alias{clvm}
 \title{Fit a CLVM Model}
 \usage{
-clvm(y, x, maxiter = 10000, elbo_tol = 0.001, thin = 10, verbose = TRUE,
+clvm(y, x, maxiter = 10000, elbo_tol = 0.005, thin = 1, verbose = TRUE,
   tau_q = 1, tau_mu = 1, tau_c = 1, a = 2, b = 2, tau_alpha = 1,
-  a_beta = 6, b_beta = 0.1, a_tau = 2, b_tau = 0.5, q = rep(0,
-  nrow(y)))
+  a_beta = 0.01, b_beta = 0.01, q = rep(0, nrow(y)))
 }
 \arguments{
 \item{y}{A N-by-G (dynamic) input matrix}
@@ -39,10 +38,6 @@ re-calculating the elbo}
 \item{a_beta}{Hyperparameter a_beta}
 
 \item{b_beta}{Hyperparameter b_beta}
-
-\item{a_tau}{Hyperparameter a_tau}
-
-\item{b_tau}{Hyperparameter b_tau}
 
 \item{q}{Priors on the latent variables}
 }

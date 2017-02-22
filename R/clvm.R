@@ -140,15 +140,26 @@ clvm <- function(y, x, maxiter = 1e4,
 }
   
 
-
-get_sig <- function(pcavi) {
+#' Significance testing for interaction features
+#' 
+#' Given the results of \code{clvm}, decide which features show significant
+#' iteractions between the latent trajectory and covariates. Significant 
+#' features are designated as those where the variational mean of the interaction
+#' coefficient falls outside the \eqn{n \sigma} interval of 0.
+#' 
+#' @param pcavi The results of a call to \code{clvm}
+#' 
+#' @return A logical vector describing whether each feature passes the significance test.
+#' 
+#' @export
+significant_interactions <- function(pcavi, n = 2) {
   m_beta <- pcavi$m_beta
   pos_sd <- sqrt(pcavi$s_beta)
   
   sig <- sapply(seq_len(nrow(m_beta)), function(i) {
-    m_beta[i,] - 2 * pos_sd[i,] > 0 | m_beta[i,] + 2 * pos_sd[i,] < 0
+    m_beta[i,] - n * pos_sd[i,] > 0 | m_beta[i,] + n * pos_sd[i,] < 0
   })
-  return(t(sig))
+  return(as.vector(sig))
 }
 
 
