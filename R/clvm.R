@@ -23,6 +23,7 @@ library(Rcpp)
 #' @param a_beta Hyperparameter a_beta
 #' @param b_beta Hyperparameter b_beta
 #' @param q Priors on the latent variables
+#' @param pc_initialise Which principal component should z be initialised to?
 #' 
 #' @return 
 #' A list whose entries correspond to the converged values of the
@@ -42,7 +43,8 @@ clvm <- function(y, x, maxiter = 1e4,
                            a = 2, b = 2,
                            tau_alpha = 1,
                            a_beta = 1e-2, b_beta = 1e-2,
-                           q = rep(0, nrow(y))) {
+                           q = rep(0, nrow(y)),
+                           pc_initialise = 1) {
 
   N <- nrow(y)
   G <- ncol(y)
@@ -61,7 +63,7 @@ clvm <- function(y, x, maxiter = 1e4,
   a_chi <- matrix(rgamma(P * G, 2), nrow = P)
   b_chi <- matrix(rgamma(P * G, 2), nrow = P)
   
-  m_t <- prcomp(scale(y))$x[,1]
+  m_t <- prcomp(scale(y))$x[,pc_initialise]
   s_t <- rep(1, N) # CHANGE TO 1
   m_c <- apply(y, 2, function(yy) coef(lm(yy ~ m_t))[2])
   

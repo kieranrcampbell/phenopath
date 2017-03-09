@@ -6,7 +6,7 @@
 \usage{
 clvm(y, x, maxiter = 10000, elbo_tol = 0.005, thin = 1, verbose = TRUE,
   tau_q = 1, tau_mu = 1, tau_c = 1, a = 2, b = 2, tau_alpha = 1,
-  a_beta = 0.01, b_beta = 0.01, q = rep(0, nrow(y)))
+  a_beta = 0.01, b_beta = 0.01, q = rep(0, nrow(y)), pc_initialise = 1)
 }
 \arguments{
 \item{y}{A N-by-G (dynamic) input matrix}
@@ -40,6 +40,8 @@ re-calculating the elbo}
 \item{b_beta}{Hyperparameter b_beta}
 
 \item{q}{Priors on the latent variables}
+
+\item{pc_initialise}{Which principal component should z be initialised to?}
 }
 \value{
 A list whose entries correspond to the converged values of the
