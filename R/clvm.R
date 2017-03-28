@@ -161,7 +161,7 @@ significant_interactions <- function(pcavi, n = 2) {
   sig <- sapply(seq_len(nrow(m_beta)), function(i) {
     m_beta[i,] - n * pos_sd[i,] > 0 | m_beta[i,] + n * pos_sd[i,] < 0
   })
-  return(as.vector(sig))
+  return(sig)
 }
 
 
