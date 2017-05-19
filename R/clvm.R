@@ -94,7 +94,8 @@ clvm <- function(y, x, maxiter = 1e4,
                            s_beta, m_mu, s_mu, a, b)
     a_tau <- cut[,1]; b_tau <- cut[,2]
     
-
+    #alpha_sum <- calculate_greek_sum(alpha, x)
+    #beta_sum <- calculate_greek_sum(beta, x)
     for(g in 1:G) {
       for(p in 1:P) {
         cua <- cavi_update_alpha(p-1, g-1, y, x, m_t, m_c, m_alpha, m_beta, a_tau, b_tau,
