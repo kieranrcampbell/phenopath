@@ -17,6 +17,22 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// update_greek_sum
+NumericMatrix update_greek_sum(int g, int p, NumericMatrix greek_sum, NumericMatrix greek, double new_greek, NumericMatrix x);
+RcppExport SEXP clvm_update_greek_sum(SEXP gSEXP, SEXP pSEXP, SEXP greek_sumSEXP, SEXP greekSEXP, SEXP new_greekSEXP, SEXP xSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< int >::type g(gSEXP);
+    Rcpp::traits::input_parameter< int >::type p(pSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type greek_sum(greek_sumSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type greek(greekSEXP);
+    Rcpp::traits::input_parameter< double >::type new_greek(new_greekSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
+    rcpp_result_gen = Rcpp::wrap(update_greek_sum(g, p, greek_sum, greek, new_greek, x));
+    return rcpp_result_gen;
+END_RCPP
+}
 // greek_square_exp
 NumericMatrix greek_square_exp(NumericMatrix m_g, NumericMatrix s_g, NumericMatrix x);
 RcppExport SEXP clvm_greek_square_exp(SEXP m_gSEXP, SEXP s_gSEXP, SEXP xSEXP) {
@@ -116,11 +132,12 @@ BEGIN_RCPP
 END_RCPP
 }
 // cavi_update_alpha
-NumericVector cavi_update_alpha(int p, int g, NumericMatrix y, NumericMatrix x, NumericVector m_t, NumericVector m_c, NumericMatrix m_alpha, NumericMatrix m_beta, NumericVector a_tau, NumericVector b_tau, NumericVector m_mu, double tau_alpha);
-RcppExport SEXP clvm_cavi_update_alpha(SEXP pSEXP, SEXP gSEXP, SEXP ySEXP, SEXP xSEXP, SEXP m_tSEXP, SEXP m_cSEXP, SEXP m_alphaSEXP, SEXP m_betaSEXP, SEXP a_tauSEXP, SEXP b_tauSEXP, SEXP m_muSEXP, SEXP tau_alphaSEXP) {
+NumericVector cavi_update_alpha(NumericMatrix beta_sum, int p, int g, NumericMatrix y, NumericMatrix x, NumericVector m_t, NumericVector m_c, NumericMatrix m_alpha, NumericMatrix m_beta, NumericVector a_tau, NumericVector b_tau, NumericVector m_mu, double tau_alpha);
+RcppExport SEXP clvm_cavi_update_alpha(SEXP beta_sumSEXP, SEXP pSEXP, SEXP gSEXP, SEXP ySEXP, SEXP xSEXP, SEXP m_tSEXP, SEXP m_cSEXP, SEXP m_alphaSEXP, SEXP m_betaSEXP, SEXP a_tauSEXP, SEXP b_tauSEXP, SEXP m_muSEXP, SEXP tau_alphaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type beta_sum(beta_sumSEXP);
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< int >::type g(gSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type y(ySEXP);
@@ -133,16 +150,17 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type b_tau(b_tauSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type m_mu(m_muSEXP);
     Rcpp::traits::input_parameter< double >::type tau_alpha(tau_alphaSEXP);
-    rcpp_result_gen = Rcpp::wrap(cavi_update_alpha(p, g, y, x, m_t, m_c, m_alpha, m_beta, a_tau, b_tau, m_mu, tau_alpha));
+    rcpp_result_gen = Rcpp::wrap(cavi_update_alpha(beta_sum, p, g, y, x, m_t, m_c, m_alpha, m_beta, a_tau, b_tau, m_mu, tau_alpha));
     return rcpp_result_gen;
 END_RCPP
 }
 // cavi_update_beta
-NumericVector cavi_update_beta(int p, int g, NumericMatrix y, NumericMatrix x, NumericVector m_t, NumericVector s_t, NumericVector m_c, NumericMatrix m_alpha, NumericMatrix m_beta, NumericVector a_tau, NumericVector b_tau, NumericMatrix a_chi, NumericMatrix b_chi, NumericVector m_mu);
-RcppExport SEXP clvm_cavi_update_beta(SEXP pSEXP, SEXP gSEXP, SEXP ySEXP, SEXP xSEXP, SEXP m_tSEXP, SEXP s_tSEXP, SEXP m_cSEXP, SEXP m_alphaSEXP, SEXP m_betaSEXP, SEXP a_tauSEXP, SEXP b_tauSEXP, SEXP a_chiSEXP, SEXP b_chiSEXP, SEXP m_muSEXP) {
+NumericVector cavi_update_beta(NumericMatrix alpha_sum, int p, int g, NumericMatrix y, NumericMatrix x, NumericVector m_t, NumericVector s_t, NumericVector m_c, NumericMatrix m_alpha, NumericMatrix m_beta, NumericVector a_tau, NumericVector b_tau, NumericMatrix a_chi, NumericMatrix b_chi, NumericVector m_mu);
+RcppExport SEXP clvm_cavi_update_beta(SEXP alpha_sumSEXP, SEXP pSEXP, SEXP gSEXP, SEXP ySEXP, SEXP xSEXP, SEXP m_tSEXP, SEXP s_tSEXP, SEXP m_cSEXP, SEXP m_alphaSEXP, SEXP m_betaSEXP, SEXP a_tauSEXP, SEXP b_tauSEXP, SEXP a_chiSEXP, SEXP b_chiSEXP, SEXP m_muSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< NumericMatrix >::type alpha_sum(alpha_sumSEXP);
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< int >::type g(gSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type y(ySEXP);
@@ -157,7 +175,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericMatrix >::type a_chi(a_chiSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type b_chi(b_chiSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type m_mu(m_muSEXP);
-    rcpp_result_gen = Rcpp::wrap(cavi_update_beta(p, g, y, x, m_t, s_t, m_c, m_alpha, m_beta, a_tau, b_tau, a_chi, b_chi, m_mu));
+    rcpp_result_gen = Rcpp::wrap(cavi_update_beta(alpha_sum, p, g, y, x, m_t, s_t, m_c, m_alpha, m_beta, a_tau, b_tau, a_chi, b_chi, m_mu));
     return rcpp_result_gen;
 END_RCPP
 }

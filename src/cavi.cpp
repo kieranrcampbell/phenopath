@@ -31,6 +31,24 @@ NumericMatrix calculate_greek_sum(NumericMatrix greek, NumericMatrix x) {
 }
 
 // [[Rcpp::export]]
+NumericMatrix update_greek_sum(int g, int p,
+                               NumericMatrix greek_sum, 
+                               NumericMatrix greek,
+                               double new_greek,
+                               NumericMatrix x) {
+  /* This function strips out the alpha/beta value
+   * from the previous iteration for the CAVI update
+   */
+  int N = greek_sum.ncol();
+  
+  for(int i = 0; i < N; i++) {
+    greek_sum(g,i) = -greek(p,g) * x(i,p) + new_greek * x(i,p);
+  }
+  
+  return greek_sum;
+}
+
+// [[Rcpp::export]]
 NumericMatrix greek_square_exp(NumericMatrix m_g, NumericMatrix s_g, NumericMatrix x) {
   /**
    * this calculates E[(\sum_p greek_{pg} x_{ip})^2] = 
@@ -99,7 +117,7 @@ NumericMatrix cavi_update_pst(NumericMatrix y, NumericMatrix x,
     
     // Calculate denominator
     for(int g = 0; g < G; g++) {
-      double s_tmp = pow(m_c[g], 2.0) + s_c[g];
+      double s_tmp = m_c[g] * m_c[g] + s_c[g];
       s_tmp += 2 * m_c[g] * beta_sum(g,i) + beta_sq_exp(g,i);
       
       pst_update(i, 1) += a_tau[g] / b_tau[g] * s_tmp;
@@ -159,7 +177,7 @@ NumericMatrix cavi_update_c(NumericMatrix y, NumericMatrix x,
   
   NumericMatrix alpha_sum = calculate_greek_sum(m_alpha, x);
   NumericMatrix beta_sum = calculate_greek_sum(m_beta, x);
-  // 
+  
   NumericMatrix c_update(G, 2);
   fill(c_update.begin(), c_update.end(), 0.0);
   
@@ -219,14 +237,21 @@ NumericMatrix cavi_update_tau(NumericMatrix y, NumericMatrix x,
   for(int g = 0; g < G; g++) {
     double fg = 0.0;
     for(int i = 0; i < N; i++) {
-      fg += y(i,g) * y(i,g) + m_mu[g] * m_mu[g] + s_mu[g] + 
-        (m_t[i] * m_t[i] + s_t[i]) * (m_c[g] * m_c[g] + s_c[g]);
-      fg += alpha_square_sum(g,i) + (m_t[i] * m_t[i] + s_t[i]) * beta_square_sum(g,i);
-      fg -= 2 * y(i,g) * (m_mu[g] + alpha_sum(g,i) + m_t[i] * (m_c[g] + beta_sum(g,i)));
-      fg += 2 * (m_mu[g] * alpha_sum(g,i) + m_mu[g] * m_t[i] * m_c[g]);
-      fg += 2 * (m_mu[g] * m_t[i] * beta_sum(g,i) + m_t[i] * m_c[g] * alpha_sum(g,i));
-      fg += 2 * (m_t[i] * alpha_sum(g,i) * beta_sum(g,i) + 
-        (m_t[i] * m_t[i] + s_t[i]) * m_c[g]*  beta_sum(g,i)  );
+      fg += m_mu[g] * m_mu[g] + s_mu[g]; // 1 
+      fg += 2 * m_mu[g] * alpha_sum(g,i); // 2
+      fg += 2 * m_mu[g] * m_t[i] * m_c[g]; // 3
+      fg += 2 * m_mu[g] * m_t[i] * beta_sum(g,i); // 4
+      fg -= 2 * y(i,g) * m_mu[g]; // 5
+      fg += alpha_square_sum(g,i); // 6
+      fg += 2 * m_t[i] * m_c[g] * alpha_sum(g,i); // 7
+      fg += 2 * m_t[i] * alpha_sum(g,i) * beta_sum(g,i); // 8
+      fg -= 2 * y(i,g) * alpha_sum(g,i); // 9
+      fg += (m_t[i] * m_t[i] + s_t[i]) * (m_c[g] * m_c[g] + s_c[g]); // 10
+      fg += 2 * (m_t[i] * m_t[i] + s_t[i]) * m_c[g] * beta_sum(g,i); // 11
+      fg -= 2 * m_c[g] * m_t[i] * y(i,g); // 12
+      fg += (m_t[i] * m_t[i] + s_t[i]) * beta_square_sum(g,i);// 13
+      fg -= 2 * y(i,g) * m_t[i] *  beta_sum(g,i); // 14
+      fg += y(i,g) * y(i,g); // 15
       }
 
     tau_update(g,1) = b + 0.5 * fg;
@@ -236,7 +261,7 @@ NumericMatrix cavi_update_tau(NumericMatrix y, NumericMatrix x,
 }
 
 // [[Rcpp::export]]
-NumericVector cavi_update_alpha(int p, int g, NumericMatrix y, NumericMatrix x, 
+NumericVector cavi_update_alpha(NumericMatrix beta_sum, int p, int g, NumericMatrix y, NumericMatrix x, 
                                 NumericVector m_t, NumericVector m_c,
                                 NumericMatrix m_alpha, NumericMatrix m_beta,
                                 NumericVector a_tau, NumericVector b_tau,
@@ -249,7 +274,7 @@ NumericVector cavi_update_alpha(int p, int g, NumericMatrix y, NumericMatrix x,
   int N = y.nrow();
   int P = x.ncol();
   
-  NumericMatrix beta_sum = calculate_greek_sum(m_beta, x);
+  // NumericMatrix beta_sum = calculate_greek_sum(m_beta, x);
   
   double s_alpha_pg = tau_alpha;
   for(int i = 0; i < N; i++)
@@ -276,7 +301,7 @@ NumericVector cavi_update_alpha(int p, int g, NumericMatrix y, NumericMatrix x,
 
 
 // [[Rcpp::export]]
-NumericVector cavi_update_beta(int p, int g, NumericMatrix y, NumericMatrix x, 
+NumericVector cavi_update_beta(NumericMatrix alpha_sum, int p, int g, NumericMatrix y, NumericMatrix x, 
                                 NumericVector m_t, NumericVector s_t, NumericVector m_c,
                                 NumericMatrix m_alpha, NumericMatrix m_beta,
                                 NumericVector a_tau, NumericVector b_tau,
@@ -286,7 +311,7 @@ NumericVector cavi_update_beta(int p, int g, NumericMatrix y, NumericMatrix x,
   int N = y.nrow();
   int P = x.ncol();
   
-  NumericMatrix alpha_sum = calculate_greek_sum(m_alpha, x);
+  // NumericMatrix alpha_sum = calculate_greek_sum(m_alpha, x);
   
   /** 
    * We start by calculating some useful quantities
@@ -357,14 +382,21 @@ double calculate_E_log_Y_given_theta(NumericMatrix y, NumericMatrix x,
     ely += N / 2 * (boost::math::digamma(a_tau[g]) - log(b_tau[g]));
     double fg = 0.0;
     for(int i = 0; i < N; i++) {
-      fg += y(i,g) * y(i,g) + m_mu[g] * m_mu[g] + s_mu[g] + 
-        (m_t[i] * m_t[i] + s_t[i]) * (m_c[g] * m_c[g] + s_c[g]);
-      fg += alpha_square_sum(g,i) + (m_t[i] * m_t[i] + s_t[i]) * beta_square_sum(g,i);
-      fg -= 2 * y(i,g) * (m_mu[g] + alpha_sum(g,i) + m_t[i] * (m_c[g] + beta_sum(g,i)));
-      fg += 2 * (m_mu[g] * alpha_sum(g,i) + m_mu[g] * m_t[i] * m_c[g]);
-      fg += 2 * (m_mu[g] * m_t[i] * beta_sum(g,i) + m_t[i] * m_c[g] * alpha_sum(g,i));
-      fg += 2 * (m_t[i] * alpha_sum(g,i) * beta_sum(g,i) + 
-        (m_t[i] * m_t[i] + s_t[i]) * m_c[g]*  beta_sum(g,i)  );
+      fg += m_mu[g] * m_mu[g] + s_mu[g]; // 1 
+      fg += 2 * m_mu[g] * alpha_sum(g,i); // 2
+      fg += 2 * m_mu[g] * m_t[i] * m_c[g]; // 3
+      fg += 2 * m_mu[g] * m_t[i] * beta_sum(g,i); // 4
+      fg -= 2 * y(i,g) * m_mu[g]; // 5
+      fg += alpha_square_sum(g,i); // 6
+      fg += 2 * m_t[i] * m_c[g] * alpha_sum(g,i); // 7
+      fg += 2 * m_t[i] * alpha_sum(g,i) * beta_sum(g,i); // 8
+      fg -= 2 * y(i,g) * alpha_sum(g,i); // 9
+      fg += (m_t[i] * m_t[i] + s_t[i]) * (m_c[g] * m_c[g] + s_c[g]); // 10
+      fg += 2 * (m_t[i] * m_t[i] + s_t[i]) * m_c[g] * beta_sum(g,i); // 11
+      fg -= 2 * m_c[g] * m_t[i] * y(i,g); // 12
+      fg += (m_t[i] * m_t[i] + s_t[i]) * beta_square_sum(g,i);// 13
+      fg -= 2 * y(i,g) * m_t[i] *  beta_sum(g,i); // 14
+      fg += y(i,g) * y(i,g); // 15
     }
     ely -= a_tau[g] / 2 * b_tau[g] * fg;
   }

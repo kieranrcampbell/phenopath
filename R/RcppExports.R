@@ -5,6 +5,10 @@ calculate_greek_sum <- function(greek, x) {
     .Call('clvm_calculate_greek_sum', PACKAGE = 'clvm', greek, x)
 }
 
+update_greek_sum <- function(g, p, greek_sum, greek, new_greek, x) {
+    .Call('clvm_update_greek_sum', PACKAGE = 'clvm', g, p, greek_sum, greek, new_greek, x)
+}
+
 greek_square_exp <- function(m_g, s_g, x) {
     .Call('clvm_greek_square_exp', PACKAGE = 'clvm', m_g, s_g, x)
 }
@@ -25,12 +29,12 @@ cavi_update_tau <- function(y, x, m_t, s_t, m_c, s_c, m_alpha, m_beta, s_alpha, 
     .Call('clvm_cavi_update_tau', PACKAGE = 'clvm', y, x, m_t, s_t, m_c, s_c, m_alpha, m_beta, s_alpha, s_beta, m_mu, s_mu, a, b)
 }
 
-cavi_update_alpha <- function(p, g, y, x, m_t, m_c, m_alpha, m_beta, a_tau, b_tau, m_mu, tau_alpha) {
-    .Call('clvm_cavi_update_alpha', PACKAGE = 'clvm', p, g, y, x, m_t, m_c, m_alpha, m_beta, a_tau, b_tau, m_mu, tau_alpha)
+cavi_update_alpha <- function(beta_sum, p, g, y, x, m_t, m_c, m_alpha, m_beta, a_tau, b_tau, m_mu, tau_alpha) {
+    .Call('clvm_cavi_update_alpha', PACKAGE = 'clvm', beta_sum, p, g, y, x, m_t, m_c, m_alpha, m_beta, a_tau, b_tau, m_mu, tau_alpha)
 }
 
-cavi_update_beta <- function(p, g, y, x, m_t, s_t, m_c, m_alpha, m_beta, a_tau, b_tau, a_chi, b_chi, m_mu) {
-    .Call('clvm_cavi_update_beta', PACKAGE = 'clvm', p, g, y, x, m_t, s_t, m_c, m_alpha, m_beta, a_tau, b_tau, a_chi, b_chi, m_mu)
+cavi_update_beta <- function(alpha_sum, p, g, y, x, m_t, s_t, m_c, m_alpha, m_beta, a_tau, b_tau, a_chi, b_chi, m_mu) {
+    .Call('clvm_cavi_update_beta', PACKAGE = 'clvm', alpha_sum, p, g, y, x, m_t, s_t, m_c, m_alpha, m_beta, a_tau, b_tau, a_chi, b_chi, m_mu)
 }
 
 cavi_update_chi <- function(m_beta_pg, s_beta_pg, a_beta, b_beta) {

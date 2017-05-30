@@ -44,7 +44,8 @@ clvm <- function(y, x, maxiter = 1e4,
                            tau_alpha = 1,
                            a_beta = 1e-2, b_beta = 1e-2,
                            q = rep(0, nrow(y)),
-                           pc_initialise = 1) {
+                           pc_initialise = 1,
+                 model_mu = FALSE) {
 
   N <- nrow(y)
   G <- ncol(y)
@@ -64,7 +65,9 @@ clvm <- function(y, x, maxiter = 1e4,
   b_chi <- matrix(rgamma(P * G, 2), nrow = P)
   
   m_t <- prcomp(scale(y))$x[,pc_initialise]
-  s_t <- rep(1, N) # CHANGE TO 1
+  m_t <- (m_t - mean(m_t)) / sd(m_t)
+  s_t <- rep(0.1, N) 
+  
   m_c <- apply(y, 2, function(yy) coef(lm(yy ~ m_t))[2])
   
   m_mu <- rep(0, G)
@@ -83,8 +86,13 @@ clvm <- function(y, x, maxiter = 1e4,
 
   while(i < maxiter & delta_elbo > elbo_tol) {
     
-    cumu <- cavi_update_mu(y, x, m_t, m_c, m_alpha, m_beta, a_tau, b_tau, tau_mu)
-    m_mu <- cumu[,1]; s_mu <- cumu[,2]
+    if(model_mu) {
+      cumu <- cavi_update_mu(y, x, m_t, m_c, m_alpha, m_beta, a_tau, b_tau, tau_mu)
+      m_mu <- cumu[,1]; s_mu <- cumu[,2]
+    } else {
+      m_mu <- rep(0,G)
+      s_mu <- rep(0,G)
+    }
 
     cuc <- cavi_update_c(y, x, m_t, s_t, m_alpha, m_beta, a_tau, b_tau,
                          m_mu, tau_c)
@@ -94,20 +102,41 @@ clvm <- function(y, x, maxiter = 1e4,
                            s_beta, m_mu, s_mu, a, b)
     a_tau <- cut[,1]; b_tau <- cut[,2]
     
-    #alpha_sum <- calculate_greek_sum(alpha, x)
-    #beta_sum <- calculate_greek_sum(beta, x)
+    alpha_sum <- calculate_greek_sum(m_alpha, x)
+    beta_sum <- calculate_greek_sum(m_beta, x)
+    
     for(g in 1:G) {
       for(p in 1:P) {
-        cua <- cavi_update_alpha(p-1, g-1, y, x, m_t, m_c, m_alpha, m_beta, a_tau, b_tau,
+        ## First calculate alpha update
+        cua <- cavi_update_alpha(beta_sum, p-1, g-1, y, x, m_t, m_c, m_alpha, m_beta, a_tau, b_tau,
                                  m_mu, tau_alpha)
+        
+        ## Now sort the modified _alpha_ sum matrix
+        # for(i in 1:N) { # bite me
+        #   alpha_sum[g,i] <- -m_alpha[p,g] * x[i,p] + cua[1] * x[i,p]
+        # }
+        
+        alpha_sum <- update_greek_sum(g-1, p-1, alpha_sum, m_alpha, cua[1], x)
+      
+        
+        # Now update the alphas
         m_alpha[p,g] <- cua[1] 
         s_alpha[p,g] <- cua[2]
         
-        cub <- cavi_update_beta(p-1, g-1, y, x, m_t, s_t, m_c, m_alpha, m_beta, a_tau,
+        ## Calculate beta update
+        cub <- cavi_update_beta(alpha_sum, p-1, g-1, y, x, m_t, s_t, m_c, m_alpha, m_beta, a_tau,
                                 b_tau, a_chi, b_chi, m_mu)
-        s_beta[p,g] <- cub[2]
-        m_beta[p,g] <- cub[1]
         
+        # now sort the betas
+        # for(i in 1:N) {
+        #   beta_sum[g,i] <- -m_beta[p,g] * x[i,p] + cub[1] * x[i,p]
+        # }
+        beta_sum <- update_greek_sum(g-1, p-1, beta_sum, m_beta, cub[1], x)
+        
+        
+        m_beta[p,g] <- cub[1]
+        s_beta[p,g] <- cub[2]
+                
         cuch <- cavi_update_chi(m_beta[p,g], s_beta[p,g], a_beta, b_beta)
         a_chi[p,g] <- cuch[1]; b_chi[p,g] <- cuch[2]
       }
