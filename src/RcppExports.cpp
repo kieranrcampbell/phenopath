@@ -304,3 +304,26 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+
+static const R_CallMethodDef CallEntries[] = {
+    {"clvm_calculate_greek_sum", (DL_FUNC) &clvm_calculate_greek_sum, 2},
+    {"clvm_update_greek_sum", (DL_FUNC) &clvm_update_greek_sum, 6},
+    {"clvm_greek_square_exp", (DL_FUNC) &clvm_greek_square_exp, 3},
+    {"clvm_cavi_update_pst", (DL_FUNC) &clvm_cavi_update_pst, 12},
+    {"clvm_cavi_update_mu", (DL_FUNC) &clvm_cavi_update_mu, 9},
+    {"clvm_cavi_update_c", (DL_FUNC) &clvm_cavi_update_c, 10},
+    {"clvm_cavi_update_tau", (DL_FUNC) &clvm_cavi_update_tau, 14},
+    {"clvm_cavi_update_alpha", (DL_FUNC) &clvm_cavi_update_alpha, 13},
+    {"clvm_cavi_update_beta", (DL_FUNC) &clvm_cavi_update_beta, 15},
+    {"clvm_cavi_update_chi", (DL_FUNC) &clvm_cavi_update_chi, 4},
+    {"clvm_calculate_E_log_Y_given_theta", (DL_FUNC) &clvm_calculate_E_log_Y_given_theta, 14},
+    {"clvm_calculate_E_log_p", (DL_FUNC) &clvm_calculate_E_log_p, 23},
+    {"clvm_calculate_E_log_q", (DL_FUNC) &clvm_calculate_E_log_q, 9},
+    {"clvm_calculate_elbo", (DL_FUNC) &clvm_calculate_elbo, 25},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_clvm(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
+}

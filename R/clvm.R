@@ -23,7 +23,7 @@ library(Rcpp)
 #' @param a_beta Hyperparameter a_beta
 #' @param b_beta Hyperparameter b_beta
 #' @param q Priors on the latent variables
-#' @param pc_initialise Which principal component should z be initialised to?
+#' @param pst_init KIERAN WRITE
 #' 
 #' @return 
 #' A list whose entries correspond to the converged values of the
@@ -34,46 +34,100 @@ library(Rcpp)
 #' 
 #' @export
 clvm <- function(y, x, maxiter = 1e4,
-                           elbo_tol = 0.005,
-                           thin = 1,
-                           verbose = TRUE,
-                           tau_q = 1,
-                           tau_mu = 1,
-                           tau_c = 1,
-                           a = 2, b = 2,
-                           tau_alpha = 1,
-                           a_beta = 1e-2, b_beta = 1e-2,
-                           q = rep(0, nrow(y)),
-                           pc_initialise = 1,
-                 model_mu = FALSE) {
+                 elbo_tol = 0.005,
+                 thin = 1,
+                 verbose = TRUE,
+                 pst_init = 1,
+                 tau_q = 1,
+                 tau_mu = 1,
+                 tau_c = 1,
+                 a = 2, b = 2,
+                 tau_alpha = 1,
+                 a_beta = 1e-2, b_beta = 1e-2,
+                 q = rep(0, nrow(y)),
+                 model_mu = FALSE,
+                 true_beta = NULL,
+                 true_c = NULL,
+                 true_tau = NULL,
+                 scale_y = TRUE,
+                 update_pst = TRUE) {
 
   N <- nrow(y)
   G <- ncol(y)
   P <- ncol(x)
   
+  if(scale_y) {
+    y <- scale(y, scale = T)
+  }
+  
   ## Parameter initialisation
   
-  a_tau <- rgamma(G, 2)
-  b_tau <- rgamma(G, 2)
-  ab_tau <- a_tau / b_tau
-  m_mu <- rnorm(G)
-  s_c <- rgamma(G, 2)
-  s_beta <- s_alpha <- matrix(1, nrow = P, ncol = G)
-  m_beta <- m_alpha <- matrix(0, nrow = P, ncol = G)
+  if(is.null(true_tau)) {
+    a_tau <- rep(1, G) # rgamma(G, 2)
+    b_tau <- rep(1, G) # rgamma(G, 2)
+  } else {
+    a_tau = true_tau^2 / 0.001
+    b_tau = true_tau / 0.001
+  }
+
+  if(P == 1) {
+    f <- apply(y, 2, function(yy) {
+      fit <- lm(yy ~ 0 + x[,1])
+      coef(fit)
+    })
+    m_alpha <- matrix(f, nrow = 1, ncol = G)
+  } else {
+    m_alpha <- matrix(0, nrow = P, ncol = G)
+  }
+  s_alpha <- matrix(0.1, nrow = P, ncol = G)
   
-  a_chi <- matrix(rgamma(P * G, 2), nrow = P)
-  b_chi <- matrix(rgamma(P * G, 2), nrow = P)
   
-  m_t <- prcomp(scale(y))$x[,pc_initialise]
-  m_t <- (m_t - mean(m_t)) / sd(m_t)
-  s_t <- rep(0.1, N) 
+  if(is.null(true_beta)) {
+    m_beta <- matrix(0, nrow = P, ncol = G)
+    s_beta <- matrix(0.1, nrow = P, ncol = G)
+  } else {
+    m_beta = true_beta
+    s_beta <- matrix(0.0001, nrow = P, ncol = G)
+  }
   
-  m_c <- apply(y, 2, function(yy) coef(lm(yy ~ m_t))[2])
+  
+  a_chi <- matrix(0.1, nrow = P, ncol = G)
+  b_chi <- matrix(0.01, nrow = P, ncol = G)
+  
+  ## Three options for pst init:
+  ## (1) A numeric vector of initial values
+  ## (2) A single integer specifying which PC to initialise to
+  ## (3) A text character "random" in which case they're drawn N(0,1)
+
+  if(length(pst_init) == 1 && is.numeric(pst_init)) {  
+    m_t <- prcomp(scale(y))$x[,pst_init]
+    m_t <- (m_t - mean(m_t)) / sd(m_t)
+  } else if(length(pst_init) == N && is.numeric(pst_init)) {
+    m_t <- pst_init
+  } else if(pst_init == "random") {
+    m_t <- rnorm(N)
+  } else if(pst_init == "pc1_with_noise") {
+    m_t <- prcomp(scale(y))$x[,1]
+    m_t <- (m_t - mean(m_t)) / sd(m_t)
+    m_t <- rnorm(N, m_t)
+  } else {
+    stop("z initialisation not recognised")
+  }
+  s_t <- rep(0.1, N)
+  
+  
+  if(is.null(true_c)) {
+    m_c <- apply(y, 2, function(yy) coef(lm(yy ~ m_t))[2])
+    m_c <- (m_c - mean(m_c)) / sd(m_c)
+    s_c <- rep(0.1, G)
+  } else {
+    m_c = true_c
+    s_c <- rep(0.0001, G)
+  }
   
   m_mu <- rep(0, G)
-  s_mu <- rep(1, G)
+  s_mu <- rep(0.1, G)
   
-  malpha1 <- NULL
   
   if(verbose) {
     cat("ELBO\t\tChange (%) \n")
@@ -91,16 +145,21 @@ clvm <- function(y, x, maxiter = 1e4,
       m_mu <- cumu[,1]; s_mu <- cumu[,2]
     } else {
       m_mu <- rep(0,G)
-      s_mu <- rep(0,G)
+      s_mu <- rep(0.01,G)
     }
 
     cuc <- cavi_update_c(y, x, m_t, s_t, m_alpha, m_beta, a_tau, b_tau,
                          m_mu, tau_c)
-    m_c <- cuc[,1]; s_c <- cuc[,2]
+    if(is.null(true_c)) {
+      m_c <- cuc[,1]; s_c <- cuc[,2]
+    }
     
     cut <- cavi_update_tau(y, x, m_t, s_t, m_c, s_c, m_alpha, m_beta, s_alpha,
                            s_beta, m_mu, s_mu, a, b)
-    a_tau <- cut[,1]; b_tau <- cut[,2]
+    
+    if(is.null(true_tau)) {
+      a_tau <- cut[,1]; b_tau <- cut[,2]
+    }
     
     alpha_sum <- calculate_greek_sum(m_alpha, x)
     beta_sum <- calculate_greek_sum(m_beta, x)
@@ -133,17 +192,20 @@ clvm <- function(y, x, maxiter = 1e4,
         # }
         beta_sum <- update_greek_sum(g-1, p-1, beta_sum, m_beta, cub[1], x)
         
-        
-        m_beta[p,g] <- cub[1]
-        s_beta[p,g] <- cub[2]
+        if(is.null(true_beta)) {
+          m_beta[p,g] <- cub[1]
+          s_beta[p,g] <- cub[2]
+        }
                 
         cuch <- cavi_update_chi(m_beta[p,g], s_beta[p,g], a_beta, b_beta)
-        a_chi[p,g] <- cuch[1]; b_chi[p,g] <- cuch[2]
+        a_chi[p,g] <- cuch[1]; b_chi[p,g] <- cuch[2] 
       }
     }
     
     cup <- cavi_update_pst(y, x, m_c, m_mu, s_c, m_alpha, m_beta, s_beta, a_tau, b_tau, q, tau_q)
-    m_t <- cup[,1]; s_t <- cup[,2]
+    if(update_pst) {
+      m_t <- cup[,1]; s_t <- cup[,2]
+    }
     
     ## calculate elbo and report
     if(i %% thin == 0) {
@@ -164,7 +226,7 @@ clvm <- function(y, x, maxiter = 1e4,
     warning("ELBO not converged")
   }
 
-  rlist <- list(m_t = m_t, m_c = m_c, m_mu = m_mu, m_alpha = m_alpha,
+  rlist <- list(m_t = m_t, s_t = s_t, m_c = m_c, s_c = s_c, m_mu = m_mu, m_alpha = m_alpha,
                 s_alpha = s_alpha, a_tau = a_tau, b_tau = b_tau,
                 m_beta = m_beta, s_beta = s_beta, chi_exp = a_chi / b_chi,
                 elbos = elbos)
