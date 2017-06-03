@@ -43,10 +43,11 @@ clvm <- function(y, x, maxiter = 1e4,
                  tau_c = 1,
                  a = 2, b = 2,
                  tau_alpha = 1,
-                 a_beta = 1e-2, b_beta = 1e-2,
+                 a_beta = 10, b_beta = 1,
                  q = rep(0, nrow(y)),
                  model_mu = FALSE,
-                 true_beta = NULL,
+                 true_beta = NULL, true_alpha = NULL,
+                 true_chi = NULL,
                  true_c = NULL,
                  true_tau = NULL,
                  scale_y = TRUE,
@@ -70,16 +71,21 @@ clvm <- function(y, x, maxiter = 1e4,
     b_tau = true_tau / 0.001
   }
 
-  if(P == 1) {
-    f <- apply(y, 2, function(yy) {
-      fit <- lm(yy ~ 0 + x[,1])
-      coef(fit)
-    })
-    m_alpha <- matrix(f, nrow = 1, ncol = G)
+  if(is.null(true_alpha)) {
+    if(P == 1) {
+      f <- apply(y, 2, function(yy) {
+        fit <- lm(yy ~ 0 + x[,1])
+        coef(fit)
+      })
+      m_alpha <- matrix(f, nrow = 1, ncol = G)
+    } else {
+      m_alpha <- matrix(0, nrow = P, ncol = G)
+    }
+    s_alpha <- matrix(0.1, nrow = P, ncol = G)
   } else {
-    m_alpha <- matrix(0, nrow = P, ncol = G)
+    m_alpha = true_alpha
+    s_alpha <- matrix(0.001, nrow = P, ncol = G)
   }
-  s_alpha <- matrix(0.1, nrow = P, ncol = G)
   
   
   if(is.null(true_beta)) {
@@ -87,12 +93,16 @@ clvm <- function(y, x, maxiter = 1e4,
     s_beta <- matrix(0.1, nrow = P, ncol = G)
   } else {
     m_beta = true_beta
-    s_beta <- matrix(0.0001, nrow = P, ncol = G)
+    s_beta <- matrix(0.0000001, nrow = P, ncol = G)
   }
   
-  
-  a_chi <- matrix(0.1, nrow = P, ncol = G)
-  b_chi <- matrix(0.01, nrow = P, ncol = G)
+  if(is.null(true_chi)) {
+    a_chi <- matrix(0.1, nrow = P, ncol = G)
+    b_chi <- matrix(0.01, nrow = P, ncol = G)
+  } else {
+    a_chi <- matrix(true_chi[,1], nrow = 1)
+    b_chi <- matrix(true_chi[,2], nrow = 1)
+  }
   
   ## Three options for pst init:
   ## (1) A numeric vector of initial values
@@ -113,7 +123,12 @@ clvm <- function(y, x, maxiter = 1e4,
   } else {
     stop("z initialisation not recognised")
   }
-  s_t <- rep(0.1, N)
+  
+  if(update_pst == TRUE) {
+    s_t <- rep(0.1, N)
+  } else {
+    s_t <- rep(0.00001, N)
+  }
   
   
   if(is.null(true_c)) {
@@ -136,6 +151,8 @@ clvm <- function(y, x, maxiter = 1e4,
   elbo_old <- -Inf
   delta_elbo <- Inf
   elbos <- NULL
+  elys <- elps <- elqs <- NULL
+  ts <- cs <- betas <- taus <- chis <- alphas <- betas <- NULL
   i <- 1
 
   while(i < maxiter & delta_elbo > elbo_tol) {
@@ -145,14 +162,15 @@ clvm <- function(y, x, maxiter = 1e4,
       m_mu <- cumu[,1]; s_mu <- cumu[,2]
     } else {
       m_mu <- rep(0,G)
-      s_mu <- rep(0.01,G)
+      s_mu <- rep(0,G)
     }
-
+    
     cuc <- cavi_update_c(y, x, m_t, s_t, m_alpha, m_beta, a_tau, b_tau,
                          m_mu, tau_c)
     if(is.null(true_c)) {
       m_c <- cuc[,1]; s_c <- cuc[,2]
     }
+    cs <- c(cs, sum(m_c^2))
     
     cut <- cavi_update_tau(y, x, m_t, s_t, m_c, s_c, m_alpha, m_beta, s_alpha,
                            s_beta, m_mu, s_mu, a, b)
@@ -160,12 +178,13 @@ clvm <- function(y, x, maxiter = 1e4,
     if(is.null(true_tau)) {
       a_tau <- cut[,1]; b_tau <- cut[,2]
     }
+    taus <- c(taus, sum((a_tau / b_tau)^2))
     
     alpha_sum <- calculate_greek_sum(m_alpha, x)
     beta_sum <- calculate_greek_sum(m_beta, x)
     
-    for(g in 1:G) {
-      for(p in 1:P) {
+    for(g in sample(1:G)) {
+      for(p in sample(1:P)) {
         ## First calculate alpha update
         cua <- cavi_update_alpha(beta_sum, p-1, g-1, y, x, m_t, m_c, m_alpha, m_beta, a_tau, b_tau,
                                  m_mu, tau_alpha)
@@ -175,12 +194,14 @@ clvm <- function(y, x, maxiter = 1e4,
         #   alpha_sum[g,i] <- -m_alpha[p,g] * x[i,p] + cua[1] * x[i,p]
         # }
         
-        alpha_sum <- update_greek_sum(g-1, p-1, alpha_sum, m_alpha, cua[1], x)
-      
+        
         
         # Now update the alphas
-        m_alpha[p,g] <- cua[1] 
-        s_alpha[p,g] <- cua[2]
+        if(is.null(true_alpha)) {
+          alpha_sum <- update_greek_sum(g-1, p-1, alpha_sum, m_alpha, cua[1], x)
+          m_alpha[p,g] <- cua[1] 
+          s_alpha[p,g] <- cua[2]
+        }
         
         ## Calculate beta update
         cub <- cavi_update_beta(alpha_sum, p-1, g-1, y, x, m_t, s_t, m_c, m_alpha, m_beta, a_tau,
@@ -190,28 +211,42 @@ clvm <- function(y, x, maxiter = 1e4,
         # for(i in 1:N) {
         #   beta_sum[g,i] <- -m_beta[p,g] * x[i,p] + cub[1] * x[i,p]
         # }
-        beta_sum <- update_greek_sum(g-1, p-1, beta_sum, m_beta, cub[1], x)
         
         if(is.null(true_beta)) {
+          beta_sum <- update_greek_sum(g-1, p-1, beta_sum, m_beta, cub[1], x)
           m_beta[p,g] <- cub[1]
           s_beta[p,g] <- cub[2]
         }
                 
         cuch <- cavi_update_chi(m_beta[p,g], s_beta[p,g], a_beta, b_beta)
-        a_chi[p,g] <- cuch[1]; b_chi[p,g] <- cuch[2] 
+        if(is.null(true_chi)) {
+          a_chi[p,g] <- cuch[1]; b_chi[p,g] <- cuch[2] 
+        }
       }
     }
     
+    alphas <- c(alphas, sum(m_alpha^2))
+    betas <- c(betas, sum(m_beta^2))
+
     cup <- cavi_update_pst(y, x, m_c, m_mu, s_c, m_alpha, m_beta, s_beta, a_tau, b_tau, q, tau_q)
     if(update_pst) {
       m_t <- cup[,1]; s_t <- cup[,2]
     }
+    ts <- c(ts, sum(m_t^2))
     
     ## calculate elbo and report
     if(i %% thin == 0) {
-      elbo <- calculate_elbo(y, x, m_t, s_t, m_c, s_c, m_alpha, s_alpha, m_beta, 
+      elbo_vec <- calculate_elbo(y, x, m_t, s_t, m_c, s_c, m_alpha, s_alpha, m_beta, 
                              s_beta, a_tau, b_tau, a_chi, b_chi, m_mu, s_mu, q, tau_q, 
-                             tau_mu, tau_c, a, b, tau_alpha, a_beta, b_beta) 
+                             tau_mu, tau_c, a, b, tau_alpha, a_beta, b_beta,
+                             as.integer(model_mu)) 
+      
+      # print(elbo_vec)
+      elbo <- elbo_vec[1] + elbo_vec[2] - elbo_vec[3]
+      elys <- c(elys, elbo_vec[1])
+      elps <- c(elps, elbo_vec[2])
+      elqs <- c(elqs, elbo_vec[3])
+      
       delta_elbo <- abs((elbo - elbo_old) / elbo * 100)
       if(verbose) {
         cat(paste(elbo, delta_elbo, sep = "\t"), "\n")
@@ -229,7 +264,8 @@ clvm <- function(y, x, maxiter = 1e4,
   rlist <- list(m_t = m_t, s_t = s_t, m_c = m_c, s_c = s_c, m_mu = m_mu, m_alpha = m_alpha,
                 s_alpha = s_alpha, a_tau = a_tau, b_tau = b_tau,
                 m_beta = m_beta, s_beta = s_beta, chi_exp = a_chi / b_chi,
-                elbos = elbos)
+                elbos = elbos, elys = elys, elps = elps, elqs = elqs,
+                cs = cs, taus = taus, ts = ts, alphas = alphas, betas = betas)
   return(rlist)
 }
   
@@ -254,6 +290,15 @@ significant_interactions <- function(pcavi, n = 2) {
     m_beta[i,] - n * pos_sd[i,] > 0 | m_beta[i,] + n * pos_sd[i,] < 0
   })
   return(sig)
+}
+
+#' Plots the ELBO
+#' @export
+#' @param fit A CLVM fit
+#' @import ggplot2
+plot_elbo <- function(fit) {
+  elbo <- fit$elbos[-(1)]
+  qplot(seq_along(elbo) + 1, elbo, geom = c("point", "line")) + xlab("Iter") + ylab("ELBO")
 }
 
 

@@ -13,6 +13,10 @@ greek_square_exp <- function(m_g, s_g, x) {
     .Call('clvm_greek_square_exp', PACKAGE = 'clvm', m_g, s_g, x)
 }
 
+calculate_fg <- function(g, y, m_t, s_t, m_c, s_c, m_alpha, s_alpha, m_beta, s_beta, m_mu, s_mu, alpha_sum, beta_sum, alpha_square_sum, beta_square_sum) {
+    .Call('clvm_calculate_fg', PACKAGE = 'clvm', g, y, m_t, s_t, m_c, s_c, m_alpha, s_alpha, m_beta, s_beta, m_mu, s_mu, alpha_sum, beta_sum, alpha_square_sum, beta_square_sum)
+}
+
 cavi_update_pst <- function(y, x, m_c, m_mu, s_c, m_alpha, m_beta, s_beta, a_tau, b_tau, q, tau_q) {
     .Call('clvm_cavi_update_pst', PACKAGE = 'clvm', y, x, m_c, m_mu, s_c, m_alpha, m_beta, s_beta, a_tau, b_tau, q, tau_q)
 }
@@ -49,11 +53,11 @@ calculate_E_log_p <- function(m_t, s_t, m_c, s_c, m_alpha, s_alpha, m_beta, s_be
     .Call('clvm_calculate_E_log_p', PACKAGE = 'clvm', m_t, s_t, m_c, s_c, m_alpha, s_alpha, m_beta, s_beta, a_tau, b_tau, m_mu, s_mu, a_chi, b_chi, q, tau_q, tau_mu, tau_c, a, b, tau_alpha, a_beta, b_beta)
 }
 
-calculate_E_log_q <- function(s_t, s_c, s_alpha, s_beta, a_tau, b_tau, s_mu, a_chi, b_chi) {
-    .Call('clvm_calculate_E_log_q', PACKAGE = 'clvm', s_t, s_c, s_alpha, s_beta, a_tau, b_tau, s_mu, a_chi, b_chi)
+calculate_E_log_q <- function(s_t, s_c, s_alpha, s_beta, a_tau, b_tau, s_mu, a_chi, b_chi, model_mu) {
+    .Call('clvm_calculate_E_log_q', PACKAGE = 'clvm', s_t, s_c, s_alpha, s_beta, a_tau, b_tau, s_mu, a_chi, b_chi, model_mu)
 }
 
-calculate_elbo <- function(y, x, m_t, s_t, m_c, s_c, m_alpha, s_alpha, m_beta, s_beta, a_tau, b_tau, a_chi, b_chi, m_mu, s_mu, q, tau_q, tau_mu, tau_c, a, b, tau_alpha, a_beta, b_beta) {
-    .Call('clvm_calculate_elbo', PACKAGE = 'clvm', y, x, m_t, s_t, m_c, s_c, m_alpha, s_alpha, m_beta, s_beta, a_tau, b_tau, a_chi, b_chi, m_mu, s_mu, q, tau_q, tau_mu, tau_c, a, b, tau_alpha, a_beta, b_beta)
+calculate_elbo <- function(y, x, m_t, s_t, m_c, s_c, m_alpha, s_alpha, m_beta, s_beta, a_tau, b_tau, a_chi, b_chi, m_mu, s_mu, q, tau_q, tau_mu, tau_c, a, b, tau_alpha, a_beta, b_beta, model_mu) {
+    .Call('clvm_calculate_elbo', PACKAGE = 'clvm', y, x, m_t, s_t, m_c, s_c, m_alpha, s_alpha, m_beta, s_beta, a_tau, b_tau, a_chi, b_chi, m_mu, s_mu, q, tau_q, tau_mu, tau_c, a, b, tau_alpha, a_beta, b_beta, model_mu)
 }
 
