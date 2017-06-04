@@ -13,8 +13,8 @@ greek_square_exp <- function(m_g, s_g, x) {
     .Call('clvm_greek_square_exp', PACKAGE = 'clvm', m_g, s_g, x)
 }
 
-calculate_fg <- function(g, y, m_t, s_t, m_c, s_c, m_alpha, s_alpha, m_beta, s_beta, m_mu, s_mu, alpha_sum, beta_sum, alpha_square_sum, beta_square_sum) {
-    .Call('clvm_calculate_fg', PACKAGE = 'clvm', g, y, m_t, s_t, m_c, s_c, m_alpha, s_alpha, m_beta, s_beta, m_mu, s_mu, alpha_sum, beta_sum, alpha_square_sum, beta_square_sum)
+calculate_fg <- function(g, y, m_t, s_t, m_c, s_c, m_mu, s_mu, alpha_sum, beta_sum, alpha_square_sum, beta_square_sum) {
+    .Call('clvm_calculate_fg', PACKAGE = 'clvm', g, y, m_t, s_t, m_c, s_c, m_mu, s_mu, alpha_sum, beta_sum, alpha_square_sum, beta_square_sum)
 }
 
 cavi_update_pst <- function(y, x, m_c, m_mu, s_c, m_alpha, m_beta, s_beta, a_tau, b_tau, q, tau_q) {

@@ -80,13 +80,11 @@ NumericMatrix greek_square_exp(NumericMatrix m_g, NumericMatrix s_g, NumericMatr
 double calculate_fg(int g, NumericMatrix y, // NumericMatrix x, 
                     NumericVector m_t, NumericVector s_t, 
                     NumericVector m_c, NumericVector s_c,
-                    NumericMatrix m_alpha, NumericMatrix s_alpha,
-                    NumericMatrix m_beta, NumericMatrix s_beta,
                     NumericVector m_mu, NumericVector s_mu,
                     NumericMatrix alpha_sum, NumericMatrix beta_sum,
                     NumericMatrix alpha_square_sum, NumericMatrix beta_square_sum) {
   int N = y.nrow();
-
+  
   double fg = 0.0;
   for(int i = 0; i < N; i++) {
     fg += m_mu[g] * m_mu[g] + s_mu[g]; // 1
@@ -104,6 +102,7 @@ double calculate_fg(int g, NumericMatrix y, // NumericMatrix x,
     fg += (m_t[i] * m_t[i] + s_t[i]) * beta_square_sum(g,i);// 13
     fg -= 2 * y(i,g) * m_t[i] *  beta_sum(g,i); // 14
     fg += y(i,g) * y(i,g); // 15
+    
   }
   return(fg);
 }
@@ -274,8 +273,7 @@ NumericMatrix cavi_update_tau(NumericMatrix y, NumericMatrix x,
   
   for(int g = 0; g < G; g++) {
     double fg = calculate_fg(g, y, m_t,  s_t, 
-                             m_c, s_c, m_alpha, s_alpha,
-                             m_beta, s_beta, m_mu, s_mu,
+                             m_c, s_c, m_mu, s_mu,
                              alpha_sum, beta_sum,
                              alpha_square_sum, beta_square_sum);
     tau_update(g,1) = b + 0.5 * fg;
@@ -382,7 +380,7 @@ NumericVector cavi_update_beta(NumericMatrix alpha_sum, int p, int g, NumericMat
 NumericVector cavi_update_chi(double m_beta_pg, double s_beta_pg,
                               double a_beta, double b_beta) {
   double a_new = a_beta + 0.5;
-  double b_new = b_beta + 0.5 * (pow(m_beta_pg, 2) + s_beta_pg);
+  double b_new = b_beta + 0.5 * (m_beta_pg * m_beta_pg + s_beta_pg);
   
   return NumericVector::create(a_new, b_new);
 }
@@ -400,7 +398,7 @@ double calculate_E_log_Y_given_theta(NumericMatrix y, NumericMatrix x,
   int G = y.ncol();
   
   double ely = 0.0; // Expectation of log p(Y|\theta)
-  double pi = 3.14159;
+  double pi = 3.14159265359;
   
   // temporary holders
   NumericMatrix alpha_sum = calculate_greek_sum(m_alpha, x);
@@ -412,8 +410,7 @@ double calculate_E_log_Y_given_theta(NumericMatrix y, NumericMatrix x,
     double e_log_tau = (boost::math::digamma(a_tau[g]) - log(b_tau[g]));
     ely += N / 2 * (e_log_tau - log(2 * pi));
     double fg = calculate_fg(g, y,m_t,  s_t, 
-                 m_c, s_c, m_alpha, s_alpha,
-                 m_beta, s_beta, m_mu, s_mu,
+                 m_c, s_c, m_mu, s_mu,
                  alpha_sum, beta_sum,
                  alpha_square_sum, beta_square_sum);
     ely -= a_tau[g] / (2 * b_tau[g]) * fg;
@@ -437,7 +434,7 @@ double calculate_E_log_p(NumericVector m_t, NumericVector s_t,
   int P = a_chi.nrow();
   
   double elp = 0.0;
-  double pi = 3.14159;
+  double pi = 3.14159265359;
   
   for(int i = 0; i < N; i++) {
     elp += 0.5 * log(tau_q / (2*pi)) - (tau_q / 2) * (m_t[i] * m_t[i] + s_t[i] - 2 * m_t[i] * q[i] + q[i] * q[i]);
@@ -448,17 +445,17 @@ double calculate_E_log_p(NumericVector m_t, NumericVector s_t,
     elp += 0.5 * log(tau_c / (2*pi)) - tau_c / 2 * (m_c[g] * m_c[g] + s_c[g]);
     
     elp += (a - 1) * (boost::math::digamma(a_tau[g]) - log(b_tau[g])) -
-      a_tau[g] / b_tau[g] * b + a * log(b) - boost::math::tgamma(a);
+      a_tau[g] / b_tau[g] * b + a * log(b) - boost::math::lgamma(a);
     
     for(int p = 0; p < P; p++) {
       elp += 0.5 * log(tau_alpha / (2*pi)) - tau_alpha / 2 * (m_alpha(p,g) * m_alpha(p,g) + s_alpha(p,g)); 
       
-      elp += 0.5 * ( (a_chi(p,g) - 1) *  (boost::math::digamma(a_chi(p,g)) - log(b_chi(p,g))) -
-        a_chi(p,g)) - 0.5 * log(2 * pi) -
+      elp += 0.5 * (boost::math::digamma(a_chi(p,g)) - log(b_chi(p,g))) - 
+        0.5 * log(2 * pi) -
         a_chi(p,g) / (2 * b_chi(p,g)) * (m_beta(p,g) * m_beta(p,g) + s_beta(p,g));
       
       elp += (a_beta - 1) * (boost::math::digamma(a_chi(p,g)) - log(b_chi(p,g))) -
-        a_chi(p,g) / b_chi(p,g) * b_beta + a_beta * log(b_beta) - boost::math::tgamma(a_beta);
+        a_chi(p,g) / b_chi(p,g) * b_beta + a_beta * log(b_beta) - boost::math::lgamma(a_beta);
     }
   }
   
@@ -474,27 +471,27 @@ double calculate_E_log_q(NumericVector s_t, NumericVector s_c,
                   NumericMatrix a_chi, NumericMatrix b_chi,
                   int model_mu) {
   double elq = 0.0;
-  double pi = 3.14159;
+  double pi = 3.14159265359;
   
   int N = s_t.size();
   int G = s_c.size();
   int P = a_chi.nrow();
   
   for(int i = 0; i < N; i++)
-    elq -= 0.5 * log(s_t[i] / (2*pi));
+    elq -= 0.5 * log(s_t[i]) - 0.5 *  log(2*pi);
   
   for(int g = 0; g < G; g++) {
     if(model_mu == 1) {
-      elq -= 0.5 * log(s_mu[g] / (2 * pi)); 
+      elq -= 0.5 * log(s_mu[g]) - 0.5 *  log(2 * pi); 
     }
-    elq -= 0.5 * log(s_c[g] / (2 * pi));
+    elq -= 0.5 * log(s_c[g]) - 0.5 * log(2 * pi);
     
     elq += (a_tau[g] - 1) *
       (boost::math::digamma(a_tau[g]) - log(b_tau[g])) - a_tau[g] +
       a_tau[g] * log(b_tau[g]) - boost::math::lgamma(a_tau[g]);
     for(int p = 0; p < P; p++) {
-      elq -= 0.5 * log(s_alpha(p,g) / (2 * pi)); 
-      elq -= 0.5 * log(s_beta(p,g) / (2 * pi));
+      elq -= 0.5 * log(s_alpha(p,g)) - 0.5 * log(2 * pi); 
+      elq -= 0.5 * log(s_beta(p,g)) - 0.5 * log(2 * pi);
       elq += (a_chi(p,g) - 1) *
         (boost::math::digamma(a_chi(p,g)) - log(b_chi(p,g))) - a_chi(p,g) +
         a_chi(p,g) * log(b_chi(p,g)) - boost::math::lgamma(a_chi(p,g));

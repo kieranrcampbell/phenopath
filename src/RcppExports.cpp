@@ -47,8 +47,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // calculate_fg
-double calculate_fg(int g, NumericMatrix y, NumericVector m_t, NumericVector s_t, NumericVector m_c, NumericVector s_c, NumericMatrix m_alpha, NumericMatrix s_alpha, NumericMatrix m_beta, NumericMatrix s_beta, NumericVector m_mu, NumericVector s_mu, NumericMatrix alpha_sum, NumericMatrix beta_sum, NumericMatrix alpha_square_sum, NumericMatrix beta_square_sum);
-RcppExport SEXP clvm_calculate_fg(SEXP gSEXP, SEXP ySEXP, SEXP m_tSEXP, SEXP s_tSEXP, SEXP m_cSEXP, SEXP s_cSEXP, SEXP m_alphaSEXP, SEXP s_alphaSEXP, SEXP m_betaSEXP, SEXP s_betaSEXP, SEXP m_muSEXP, SEXP s_muSEXP, SEXP alpha_sumSEXP, SEXP beta_sumSEXP, SEXP alpha_square_sumSEXP, SEXP beta_square_sumSEXP) {
+double calculate_fg(int g, NumericMatrix y, NumericVector m_t, NumericVector s_t, NumericVector m_c, NumericVector s_c, NumericVector m_mu, NumericVector s_mu, NumericMatrix alpha_sum, NumericMatrix beta_sum, NumericMatrix alpha_square_sum, NumericMatrix beta_square_sum);
+RcppExport SEXP clvm_calculate_fg(SEXP gSEXP, SEXP ySEXP, SEXP m_tSEXP, SEXP s_tSEXP, SEXP m_cSEXP, SEXP s_cSEXP, SEXP m_muSEXP, SEXP s_muSEXP, SEXP alpha_sumSEXP, SEXP beta_sumSEXP, SEXP alpha_square_sumSEXP, SEXP beta_square_sumSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -58,17 +58,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< NumericVector >::type s_t(s_tSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type m_c(m_cSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type s_c(s_cSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type m_alpha(m_alphaSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type s_alpha(s_alphaSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type m_beta(m_betaSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type s_beta(s_betaSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type m_mu(m_muSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type s_mu(s_muSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type alpha_sum(alpha_sumSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type beta_sum(beta_sumSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type alpha_square_sum(alpha_square_sumSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type beta_square_sum(beta_square_sumSEXP);
-    rcpp_result_gen = Rcpp::wrap(calculate_fg(g, y, m_t, s_t, m_c, s_c, m_alpha, s_alpha, m_beta, s_beta, m_mu, s_mu, alpha_sum, beta_sum, alpha_square_sum, beta_square_sum));
+    rcpp_result_gen = Rcpp::wrap(calculate_fg(g, y, m_t, s_t, m_c, s_c, m_mu, s_mu, alpha_sum, beta_sum, alpha_square_sum, beta_square_sum));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -337,7 +333,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"clvm_calculate_greek_sum", (DL_FUNC) &clvm_calculate_greek_sum, 2},
     {"clvm_update_greek_sum", (DL_FUNC) &clvm_update_greek_sum, 6},
     {"clvm_greek_square_exp", (DL_FUNC) &clvm_greek_square_exp, 3},
-    {"clvm_calculate_fg", (DL_FUNC) &clvm_calculate_fg, 16},
+    {"clvm_calculate_fg", (DL_FUNC) &clvm_calculate_fg, 12},
     {"clvm_cavi_update_pst", (DL_FUNC) &clvm_cavi_update_pst, 12},
     {"clvm_cavi_update_mu", (DL_FUNC) &clvm_cavi_update_mu, 9},
     {"clvm_cavi_update_c", (DL_FUNC) &clvm_cavi_update_c, 10},

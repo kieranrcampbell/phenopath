@@ -141,7 +141,11 @@ clvm <- function(y, x, maxiter = 1e4,
   }
   
   m_mu <- rep(0, G)
-  s_mu <- rep(0.1, G)
+  if(model_mu) {
+    s_mu <- rep(0.1, G)
+  } else {
+    s_mu <- rep(0, G)
+  }
   
   
   if(verbose) {
