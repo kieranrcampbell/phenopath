@@ -5,8 +5,8 @@ calculate_greek_sum <- function(greek, x) {
     .Call('clvm_calculate_greek_sum', PACKAGE = 'clvm', greek, x)
 }
 
-update_greek_sum <- function(g, p, greek_sum, greek, new_greek, x) {
-    .Call('clvm_update_greek_sum', PACKAGE = 'clvm', g, p, greek_sum, greek, new_greek, x)
+update_greek_sum <- function(g, p, greek_sum, old_greek, new_greek, x) {
+    .Call('clvm_update_greek_sum', PACKAGE = 'clvm', g, p, greek_sum, old_greek, new_greek, x)
 }
 
 greek_square_exp <- function(m_g, s_g, x) {

@@ -34,16 +34,17 @@ NumericMatrix calculate_greek_sum(NumericMatrix greek, NumericMatrix x) {
 // [[Rcpp::export]]
 NumericMatrix update_greek_sum(int g, int p,
                                NumericMatrix greek_sum, 
-                               NumericMatrix greek,
+                               double old_greek,
                                double new_greek,
                                NumericMatrix x) {
   /* This function strips out the alpha/beta value
    * from the previous iteration for the CAVI update
    */
   int N = greek_sum.ncol();
+  // NumericMatrix new_greek_sum(clone(greek_sum));
   
   for(int i = 0; i < N; i++) {
-    greek_sum(g,i) = -greek(p,g) * x(i,p) + new_greek * x(i,p);
+    greek_sum(g,i) += -old_greek * x(i,p) + new_greek * x(i,p);
   }
   
   return greek_sum;
@@ -272,6 +273,7 @@ NumericMatrix cavi_update_tau(NumericMatrix y, NumericMatrix x,
     tau_update(g,0) = a + N / 2.0;
   
   for(int g = 0; g < G; g++) {
+    
     double fg = calculate_fg(g, y, m_t,  s_t, 
                              m_c, s_c, m_mu, s_mu,
                              alpha_sum, beta_sum,
@@ -314,7 +316,11 @@ NumericVector cavi_update_alpha(NumericMatrix beta_sum, int p, int g, NumericMat
   
   double m_alpha_pg = 0.0;
   for(int i = 0; i < N; i++) {
-    m_alpha_pg += x(i,p) * (y(i,g) - m_mu[g] - m_t[i] * (m_c[g] + beta_sum(g,i)) - alpha_sum_no_p[i]);
+    m_alpha_pg += x(i,p) * y(i,g);
+    m_alpha_pg -= x(i,p) * m_mu[g];
+    m_alpha_pg -= x(i,p) * m_t[i] * m_c[g];
+    m_alpha_pg -= x(i,p) * m_t[i] * beta_sum(g,i);
+    m_alpha_pg -= x(i,p) * alpha_sum_no_p[i];
   }
   m_alpha_pg *= a_tau[g] / b_tau[g];
   
@@ -342,7 +348,6 @@ NumericVector cavi_update_beta(NumericMatrix alpha_sum, int p, int g, NumericMat
   for(int i = 0; i < N; i++) {
     ms_vec[i] = m_t[i] * m_t[i] + s_t[i];
   }
-
   
   NumericVector beta_sum_no_p(N, 0.0);
   for(int i = 0; i < N; i++) {
@@ -367,8 +372,8 @@ NumericVector cavi_update_beta(NumericMatrix alpha_sum, int p, int g, NumericMat
   for(int i = 0; i < N; i++) {
     m_beta_pg += x(i,p) * m_t[i] * y(i,g);
     m_beta_pg -= x(i,p) * m_c[g] * ms_vec[i];
-    m_beta_pg -= m_t[i] * alpha_sum(g,i) * x[i];
-    m_beta_pg -= ms_vec[i] * beta_sum_no_p[i];
+    m_beta_pg -= m_t[i] * alpha_sum(g,i) * x(i,p);
+    m_beta_pg -= ms_vec[i] * beta_sum_no_p[i] * x(i,p);
   }
   m_beta_pg *= (a_tau[g] / b_tau[g]) * s_beta_pg;
   return NumericVector::create(m_beta_pg, s_beta_pg);
@@ -489,9 +494,12 @@ double calculate_E_log_q(NumericVector s_t, NumericVector s_c,
     elq += (a_tau[g] - 1) *
       (boost::math::digamma(a_tau[g]) - log(b_tau[g])) - a_tau[g] +
       a_tau[g] * log(b_tau[g]) - boost::math::lgamma(a_tau[g]);
+    
     for(int p = 0; p < P; p++) {
       elq -= 0.5 * log(s_alpha(p,g)) - 0.5 * log(2 * pi); 
+      
       elq -= 0.5 * log(s_beta(p,g)) - 0.5 * log(2 * pi);
+      
       elq += (a_chi(p,g) - 1) *
         (boost::math::digamma(a_chi(p,g)) - log(b_chi(p,g))) - a_chi(p,g) +
         a_chi(p,g) * log(b_chi(p,g)) - boost::math::lgamma(a_chi(p,g));

@@ -187,8 +187,9 @@ clvm <- function(y, x, maxiter = 1e4,
     alpha_sum <- calculate_greek_sum(m_alpha, x)
     beta_sum <- calculate_greek_sum(m_beta, x)
     
-    for(g in sample(1:G)) {
-      for(p in sample(1:P)) {
+    
+    for(g in 1:G) {
+      for(p in 1:P) {
         ## First calculate alpha update
         cua <- cavi_update_alpha(beta_sum, p-1, g-1, y, x, m_t, m_c, m_alpha, m_beta, a_tau, b_tau,
                                  m_mu, tau_alpha)
@@ -201,8 +202,10 @@ clvm <- function(y, x, maxiter = 1e4,
         
         
         # Now update the alphas
+        # print(c(m_alpha[p,g], cua[1]))
         if(is.null(true_alpha)) {
-          alpha_sum <- update_greek_sum(g-1, p-1, alpha_sum, m_alpha, cua[1], x)
+          
+          alpha_sum <- update_greek_sum(g-1, p-1, alpha_sum, m_alpha[p,g], cua[1], x)
           m_alpha[p,g] <- cua[1] 
           s_alpha[p,g] <- cua[2]
         }
@@ -217,7 +220,10 @@ clvm <- function(y, x, maxiter = 1e4,
         # }
         
         if(is.null(true_beta)) {
-          beta_sum <- update_greek_sum(g-1, p-1, beta_sum, m_beta, cub[1], x)
+          # if(p == 1) {
+          #   print(c(m_beta(p,)))
+          # }
+          beta_sum <- update_greek_sum(g-1, p-1, beta_sum, m_beta[p,g], cub[1], x)
           m_beta[p,g] <- cub[1]
           s_beta[p,g] <- cub[2]
         }
@@ -231,6 +237,7 @@ clvm <- function(y, x, maxiter = 1e4,
     
     alphas <- c(alphas, sum(m_alpha^2))
     betas <- c(betas, sum(m_beta^2))
+    chis <- c(chis, sum((a_chi / b_chi)^2))
 
     cup <- cavi_update_pst(y, x, m_c, m_mu, s_c, m_alpha, m_beta, s_beta, a_tau, b_tau, q, tau_q)
     if(update_pst) {
@@ -269,7 +276,8 @@ clvm <- function(y, x, maxiter = 1e4,
                 s_alpha = s_alpha, a_tau = a_tau, b_tau = b_tau,
                 m_beta = m_beta, s_beta = s_beta, chi_exp = a_chi / b_chi,
                 elbos = elbos, elys = elys, elps = elps, elqs = elqs,
-                cs = cs, taus = taus, ts = ts, alphas = alphas, betas = betas)
+                cs = cs, taus = taus, ts = ts, alphas = alphas, betas = betas, chis = chis,
+                beta_sum = beta_sum, alpha_sum = alpha_sum)
   return(rlist)
 }
   

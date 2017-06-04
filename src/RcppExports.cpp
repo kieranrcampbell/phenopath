@@ -18,18 +18,18 @@ BEGIN_RCPP
 END_RCPP
 }
 // update_greek_sum
-NumericMatrix update_greek_sum(int g, int p, NumericMatrix greek_sum, NumericMatrix greek, double new_greek, NumericMatrix x);
-RcppExport SEXP clvm_update_greek_sum(SEXP gSEXP, SEXP pSEXP, SEXP greek_sumSEXP, SEXP greekSEXP, SEXP new_greekSEXP, SEXP xSEXP) {
+NumericMatrix update_greek_sum(int g, int p, NumericMatrix greek_sum, double old_greek, double new_greek, NumericMatrix x);
+RcppExport SEXP clvm_update_greek_sum(SEXP gSEXP, SEXP pSEXP, SEXP greek_sumSEXP, SEXP old_greekSEXP, SEXP new_greekSEXP, SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< int >::type g(gSEXP);
     Rcpp::traits::input_parameter< int >::type p(pSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type greek_sum(greek_sumSEXP);
-    Rcpp::traits::input_parameter< NumericMatrix >::type greek(greekSEXP);
+    Rcpp::traits::input_parameter< double >::type old_greek(old_greekSEXP);
     Rcpp::traits::input_parameter< double >::type new_greek(new_greekSEXP);
     Rcpp::traits::input_parameter< NumericMatrix >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(update_greek_sum(g, p, greek_sum, greek, new_greek, x));
+    rcpp_result_gen = Rcpp::wrap(update_greek_sum(g, p, greek_sum, old_greek, new_greek, x));
     return rcpp_result_gen;
 END_RCPP
 }
