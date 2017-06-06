@@ -85,25 +85,25 @@ clvm <- function(y, x, maxiter = 1e4,
   ## (3) A text character "random" in which case they're drawn N(0,1)
 
   if(length(pst_init) == 1 && is.numeric(pst_init)) {  
-    m_t <- prcomp(scale(y))$x[,pst_init]
-    m_t <- (m_t - mean(m_t)) / sd(m_t)
+    m_z <- prcomp(scale(y))$x[,pst_init]
+    m_z <- (m_z - mean(m_z)) / sd(m_z)
   } else if(length(pst_init) == N && is.numeric(pst_init)) {
-    m_t <- pst_init
+    m_z <- pst_init
   } else if(pst_init == "random") {
-    m_t <- rnorm(N)
+    m_z <- rnorm(N)
   } else if(pst_init == "pc1_with_noise") {
-    m_t <- prcomp(scale(y))$x[,1]
-    m_t <- (m_t - mean(m_t)) / sd(m_t)
-    m_t <- rnorm(N, m_t)
+    m_z <- prcomp(scale(y))$x[,1]
+    m_z <- (m_z - mean(m_z)) / sd(m_z)
+    m_z <- rnorm(N, m_z)
   } else {
     stop("z initialisation not recognised")
   }
   
-  s_t <- rep(0.1, N)
+  s_z <- rep(0.1, N)
 
-  m_c <- apply(y, 2, function(yy) coef(lm(yy ~ m_t))[2])
-  m_c <- (m_c - mean(m_c)) / sd(m_c)
-  s_c <- rep(0.1, G)
+  m_lambda <- apply(y, 2, function(yy) coef(lm(yy ~ m_z))[2])
+  m_lambda <- (m_lambda - mean(m_lambda)) / sd(m_lambda)
+  s_lambda <- rep(0.1, G)
 
   m_mu <- rep(0, G)
   if(model_mu) {
@@ -127,7 +127,7 @@ clvm <- function(y, x, maxiter = 1e4,
   while(i < maxiter & delta_elbo > elbo_tol) {
     
     if(model_mu) {
-      cumu <- cavi_update_mu(y, x, m_t, m_c, m_alpha, m_beta, a_tau, b_tau, tau_mu)
+      cumu <- cavi_update_mu(y, x, m_z, m_lambda, m_alpha, m_beta, a_tau, b_tau, tau_mu)
       m_mu <- cumu[,1]; s_mu <- cumu[,2]
     } else {
       m_mu <- rep(0,G)
@@ -135,12 +135,12 @@ clvm <- function(y, x, maxiter = 1e4,
     }
     
     # Update lambda  
-    cuc <- cavi_update_c(y, x, m_t, s_t, m_alpha, m_beta, a_tau, b_tau,
+    culam <- cavi_update_lambda(y, x, m_z, s_z, m_alpha, m_beta, a_tau, b_tau,
                          m_mu, tau_c)
-    m_c <- cuc[,1]; s_c <- cuc[,2]
+    m_lambda <- culam[,1]; s_lambda <- culam[,2]
 
     # Update tau
-    cut <- cavi_update_tau(y, x, m_t, s_t, m_c, s_c, m_alpha, m_beta, s_alpha,
+    cut <- cavi_update_tau(y, x, m_z, s_z, m_lambda, s_lambda, m_alpha, m_beta, s_alpha,
                            s_beta, m_mu, s_mu, a, b)
     a_tau <- cut[,1]; b_tau <- cut[,2]
 
@@ -150,14 +150,14 @@ clvm <- function(y, x, maxiter = 1e4,
     for(g in 1:G) {
       for(p in 1:P) {
         ## First calculate alpha update
-        cua <- cavi_update_alpha(beta_sum, p-1, g-1, y, x, m_t, m_c, m_alpha, m_beta, a_tau, b_tau,
+        cua <- cavi_update_alpha(beta_sum, p-1, g-1, y, x, m_z, m_lambda, m_alpha, m_beta, a_tau, b_tau,
                                  m_mu, tau_alpha)
         alpha_sum <- update_greek_sum(g-1, p-1, alpha_sum, m_alpha[p,g], cua[1], x)
         m_alpha[p,g] <- cua[1] 
         s_alpha[p,g] <- cua[2]
         
         ## Calculate beta update
-        cub <- cavi_update_beta(alpha_sum, p-1, g-1, y, x, m_t, s_t, m_c, m_alpha, m_beta, a_tau,
+        cub <- cavi_update_beta(alpha_sum, p-1, g-1, y, x, m_z, s_z, m_lambda, m_alpha, m_beta, a_tau,
                                 b_tau, a_chi, b_chi, m_mu)
         
         beta_sum <- update_greek_sum(g-1, p-1, beta_sum, m_beta[p,g], cub[1], x)
@@ -170,12 +170,12 @@ clvm <- function(y, x, maxiter = 1e4,
       }
     }
 
-    cup <- cavi_update_pst(y, x, m_c, m_mu, s_c, m_alpha, m_beta, s_beta, a_tau, b_tau, q, tau_q)
-    m_t <- cup[,1]; s_t <- cup[,2]
+    cuz <- cavi_update_z(y, x, m_lambda, m_mu, s_lambda, m_alpha, m_beta, s_beta, a_tau, b_tau, q, tau_q)
+    m_z <- cuz[,1]; s_z <- cuz[,2]
 
     ## calculate elbo and report
     if(i %% thin == 0) {
-      elbo_vec <- calculate_elbo(y, x, m_t, s_t, m_c, s_c, m_alpha, s_alpha, m_beta, 
+      elbo_vec <- calculate_elbo(y, x, m_z, s_z, m_lambda, s_lambda, m_alpha, s_alpha, m_beta, 
                              s_beta, a_tau, b_tau, a_chi, b_chi, m_mu, s_mu, q, tau_q, 
                              tau_mu, tau_c, a, b, tau_alpha, a_beta, b_beta,
                              as.integer(model_mu)) 
@@ -196,7 +196,7 @@ clvm <- function(y, x, maxiter = 1e4,
     warning("ELBO not converged")
   }
 
-  rlist <- list(m_t = m_t, s_t = s_t, m_c = m_c, s_c = s_c, m_mu = m_mu, m_alpha = m_alpha,
+  rlist <- list(m_z = m_z, s_z = s_z, m_lambda = m_lambda, s_lambda = s_lambda, m_mu = m_mu, m_alpha = m_alpha,
                 s_alpha = s_alpha, a_tau = a_tau, b_tau = b_tau,
                 m_beta = m_beta, s_beta = s_beta, chi_exp = a_chi / b_chi,
                 elbos = elbos)

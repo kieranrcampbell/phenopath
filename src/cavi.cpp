@@ -79,8 +79,8 @@ NumericMatrix greek_square_exp(NumericMatrix m_g, NumericMatrix s_g, NumericMatr
 
 // [[Rcpp::export]]
 double calculate_fg(int g, NumericMatrix y, // NumericMatrix x, 
-                    NumericVector m_t, NumericVector s_t, 
-                    NumericVector m_c, NumericVector s_c,
+                    NumericVector m_z, NumericVector s_z, 
+                    NumericVector m_lambda, NumericVector s_lambda,
                     NumericVector m_mu, NumericVector s_mu,
                     NumericMatrix alpha_sum, NumericMatrix beta_sum,
                     NumericMatrix alpha_square_sum, NumericMatrix beta_square_sum) {
@@ -90,18 +90,18 @@ double calculate_fg(int g, NumericMatrix y, // NumericMatrix x,
   for(int i = 0; i < N; i++) {
     fg += m_mu[g] * m_mu[g] + s_mu[g]; // 1
     fg += 2 * m_mu[g] * alpha_sum(g,i); // 2
-    fg += 2 * m_mu[g] * m_t[i] * m_c[g]; // 3
-    fg += 2 * m_mu[g] * m_t[i] * beta_sum(g,i); // 4
+    fg += 2 * m_mu[g] * m_z[i] * m_lambda[g]; // 3
+    fg += 2 * m_mu[g] * m_z[i] * beta_sum(g,i); // 4
     fg -= 2 * y(i,g) * m_mu[g]; // 5
     fg += alpha_square_sum(g,i); // 6
-    fg += 2 * m_t[i] * m_c[g] * alpha_sum(g,i); // 7
-    fg += 2 * m_t[i] * alpha_sum(g,i) * beta_sum(g,i); // 8
+    fg += 2 * m_z[i] * m_lambda[g] * alpha_sum(g,i); // 7
+    fg += 2 * m_z[i] * alpha_sum(g,i) * beta_sum(g,i); // 8
     fg -= 2 * y(i,g) * alpha_sum(g,i); // 9
-    fg += (m_t[i] * m_t[i] + s_t[i]) * (m_c[g] * m_c[g] + s_c[g]); // 10
-    fg += 2 * (m_t[i] * m_t[i] + s_t[i]) * m_c[g] * beta_sum(g,i); // 11
-    fg -= 2 * m_c[g] * m_t[i] * y(i,g); // 12
-    fg += (m_t[i] * m_t[i] + s_t[i]) * beta_square_sum(g,i);// 13
-    fg -= 2 * y(i,g) * m_t[i] *  beta_sum(g,i); // 14
+    fg += (m_z[i] * m_z[i] + s_z[i]) * (m_lambda[g] * m_lambda[g] + s_lambda[g]); // 10
+    fg += 2 * (m_z[i] * m_z[i] + s_z[i]) * m_lambda[g] * beta_sum(g,i); // 11
+    fg -= 2 * m_lambda[g] * m_z[i] * y(i,g); // 12
+    fg += (m_z[i] * m_z[i] + s_z[i]) * beta_square_sum(g,i);// 13
+    fg -= 2 * y(i,g) * m_z[i] *  beta_sum(g,i); // 14
     fg += y(i,g) * y(i,g); // 15
     
   }
@@ -109,15 +109,15 @@ double calculate_fg(int g, NumericMatrix y, // NumericMatrix x,
 }
 
 // [[Rcpp::export]]
-NumericMatrix cavi_update_pst(NumericMatrix y, NumericMatrix x, 
-                                    NumericVector m_c, NumericVector m_mu,
-                                    NumericVector s_c, NumericMatrix m_alpha, 
+NumericMatrix cavi_update_z(NumericMatrix y, NumericMatrix x, 
+                                    NumericVector m_lambda, NumericVector m_mu,
+                                    NumericVector s_lambda, NumericMatrix m_alpha, 
                                     NumericMatrix m_beta, NumericMatrix s_beta,
                                     NumericVector a_tau, NumericVector b_tau,
                                     NumericVector q, double tau_q) {
   /***
    * This function returns an N-by-2 matrix where the entry in the 
-   * i^th row is the update values of m_t_i and s_t_i^2 respectively
+   * i^th row is the update values of m_z_i and s_z_i^2 respectively
    */
   
   int N = y.nrow();
@@ -144,7 +144,7 @@ NumericMatrix cavi_update_pst(NumericMatrix y, NumericMatrix x,
     
     // Calculate numerator
     for(int g = 0; g < G; g++) {
-      double pst_update_ig = (m_c[g] + beta_sum(g,i));
+      double pst_update_ig = (m_lambda[g] + beta_sum(g,i));
       pst_update_ig *= (y(i,g) - m_mu[g] - alpha_sum(g,i));
       pst_update_ig *= a_tau[g] / b_tau[g];
       pst_update(i,0) += pst_update_ig;      
@@ -152,8 +152,8 @@ NumericMatrix cavi_update_pst(NumericMatrix y, NumericMatrix x,
     
     // Calculate denominator
     for(int g = 0; g < G; g++) {
-      double s_tmp = m_c[g] * m_c[g] + s_c[g];
-      s_tmp +=  ((2 * m_c[g] * beta_sum(g,i)) + beta_sq_exp(g,i));
+      double s_tmp = m_lambda[g] * m_lambda[g] + s_lambda[g];
+      s_tmp +=  ((2 * m_lambda[g] * beta_sum(g,i)) + beta_sq_exp(g,i));
       
       pst_update(i, 1) += a_tau[g] / b_tau[g] * s_tmp;
     }
@@ -167,7 +167,7 @@ NumericMatrix cavi_update_pst(NumericMatrix y, NumericMatrix x,
 
 // [[Rcpp::export]]
 NumericMatrix cavi_update_mu(NumericMatrix y, NumericMatrix x, 
-                             NumericVector m_t, NumericVector m_c,
+                             NumericVector m_z, NumericVector m_lambda,
                              NumericMatrix m_alpha, NumericMatrix m_beta, 
                              NumericVector a_tau, NumericVector b_tau,
                              double tau_mu) {
@@ -187,7 +187,7 @@ NumericMatrix cavi_update_mu(NumericMatrix y, NumericMatrix x,
   // update m_mu
   for(int g = 0; g < G; g++) {
     for(int i = 0; i < N; i++) {
-      mu_update(g, 0) += y(i,g) - alpha_sum(g,i) - m_t[i] * (m_c[g] + beta_sum(g,i));
+      mu_update(g, 0) += y(i,g) - alpha_sum(g,i) - m_z[i] * (m_lambda[g] + beta_sum(g,i));
     }
     mu_update(g, 0) *= a_tau[g] / b_tau[g];
     
@@ -201,8 +201,8 @@ NumericMatrix cavi_update_mu(NumericMatrix y, NumericMatrix x,
 
 
 // [[Rcpp::export]]
-NumericMatrix cavi_update_c(NumericMatrix y, NumericMatrix x, 
-                            NumericVector m_t, NumericVector s_t,
+NumericMatrix cavi_update_lambda(NumericMatrix y, NumericMatrix x, 
+                            NumericVector m_z, NumericVector s_z,
                             NumericMatrix m_alpha, NumericMatrix m_beta, 
                             NumericVector a_tau, NumericVector b_tau,
                             NumericVector m_mu, double tau_c) {
@@ -216,11 +216,11 @@ NumericMatrix cavi_update_c(NumericMatrix y, NumericMatrix x,
   NumericMatrix c_update(G, 2);
   fill(c_update.begin(), c_update.end(), 0.0);
   
-  // calculate s_c 
+  // calculate s_lambda 
   NumericVector m_s_square(N);
   double m_s_square_sum = 0.0;
   for(int i = 0; i < N; i++) {
-    m_s_square[i] = m_t[i] * m_t[i] + s_t[i];
+    m_s_square[i] = m_z[i] * m_z[i] + s_z[i];
     m_s_square_sum += m_s_square[i];
   }
 
@@ -232,8 +232,8 @@ NumericMatrix cavi_update_c(NumericMatrix y, NumericMatrix x,
   
   for(int g = 0; g < G; g++) {
     for(int i = 0; i < N; i++) {
-      c_update(g, 0) += (m_t[i] * y(i,g) -
-      m_t[i] * m_mu[g] - m_t[i] * alpha_sum(g,i) -
+      c_update(g, 0) += (m_z[i] * y(i,g) -
+      m_z[i] * m_mu[g] - m_z[i] * alpha_sum(g,i) -
       m_s_square[i] * beta_sum(g, i));
     }
     c_update(g, 0) *= (a_tau[g] / b_tau[g]);
@@ -245,8 +245,8 @@ NumericMatrix cavi_update_c(NumericMatrix y, NumericMatrix x,
 
 // [[Rcpp::export]]
 NumericMatrix cavi_update_tau(NumericMatrix y, NumericMatrix x, 
-                              NumericVector m_t, NumericVector s_t,
-                              NumericVector m_c, NumericVector s_c,
+                              NumericVector m_z, NumericVector s_z,
+                              NumericVector m_lambda, NumericVector s_lambda,
                               NumericMatrix m_alpha, NumericMatrix m_beta,
                               NumericMatrix s_alpha, NumericMatrix s_beta,
                               NumericVector m_mu, NumericVector s_mu,
@@ -273,8 +273,8 @@ NumericMatrix cavi_update_tau(NumericMatrix y, NumericMatrix x,
   
   for(int g = 0; g < G; g++) {
     
-    double fg = calculate_fg(g, y, m_t,  s_t, 
-                             m_c, s_c, m_mu, s_mu,
+    double fg = calculate_fg(g, y, m_z,  s_z, 
+                             m_lambda, s_lambda, m_mu, s_mu,
                              alpha_sum, beta_sum,
                              alpha_square_sum, beta_square_sum);
     tau_update(g,1) = b + 0.5 * fg;
@@ -285,7 +285,7 @@ NumericMatrix cavi_update_tau(NumericMatrix y, NumericMatrix x,
 
 // [[Rcpp::export]]
 NumericVector cavi_update_alpha(NumericMatrix beta_sum, int p, int g, NumericMatrix y, NumericMatrix x, 
-                                NumericVector m_t, NumericVector m_c,
+                                NumericVector m_z, NumericVector m_lambda,
                                 NumericMatrix m_alpha, NumericMatrix m_beta,
                                 NumericVector a_tau, NumericVector b_tau,
                                 NumericVector m_mu, double tau_alpha) {
@@ -317,8 +317,8 @@ NumericVector cavi_update_alpha(NumericMatrix beta_sum, int p, int g, NumericMat
   for(int i = 0; i < N; i++) {
     m_alpha_pg += x(i,p) * y(i,g);
     m_alpha_pg -= x(i,p) * m_mu[g];
-    m_alpha_pg -= x(i,p) * m_t[i] * m_c[g];
-    m_alpha_pg -= x(i,p) * m_t[i] * beta_sum(g,i);
+    m_alpha_pg -= x(i,p) * m_z[i] * m_lambda[g];
+    m_alpha_pg -= x(i,p) * m_z[i] * beta_sum(g,i);
     m_alpha_pg -= x(i,p) * alpha_sum_no_p[i];
   }
   m_alpha_pg *= a_tau[g] / b_tau[g];
@@ -329,7 +329,7 @@ NumericVector cavi_update_alpha(NumericMatrix beta_sum, int p, int g, NumericMat
 
 // [[Rcpp::export]]
 NumericVector cavi_update_beta(NumericMatrix alpha_sum, int p, int g, NumericMatrix y, NumericMatrix x, 
-                                NumericVector m_t, NumericVector s_t, NumericVector m_c,
+                                NumericVector m_z, NumericVector s_z, NumericVector m_lambda,
                                 NumericMatrix m_alpha, NumericMatrix m_beta,
                                 NumericVector a_tau, NumericVector b_tau,
                                 NumericMatrix a_chi, NumericMatrix b_chi,
@@ -345,7 +345,7 @@ NumericVector cavi_update_beta(NumericMatrix alpha_sum, int p, int g, NumericMat
    */
   NumericVector ms_vec(N);
   for(int i = 0; i < N; i++) {
-    ms_vec[i] = m_t[i] * m_t[i] + s_t[i];
+    ms_vec[i] = m_z[i] * m_z[i] + s_z[i];
   }
   
   NumericVector beta_sum_no_p(N, 0.0);
@@ -369,9 +369,9 @@ NumericVector cavi_update_beta(NumericMatrix alpha_sum, int p, int g, NumericMat
   double m_beta_pg = 0.0;
   
   for(int i = 0; i < N; i++) {
-    m_beta_pg += x(i,p) * m_t[i] * y(i,g);
-    m_beta_pg -= x(i,p) * m_c[g] * ms_vec[i];
-    m_beta_pg -= m_t[i] * alpha_sum(g,i) * x(i,p);
+    m_beta_pg += x(i,p) * m_z[i] * y(i,g);
+    m_beta_pg -= x(i,p) * m_lambda[g] * ms_vec[i];
+    m_beta_pg -= m_z[i] * alpha_sum(g,i) * x(i,p);
     m_beta_pg -= ms_vec[i] * beta_sum_no_p[i] * x(i,p);
   }
   m_beta_pg *= (a_tau[g] / b_tau[g]) * s_beta_pg;
@@ -391,8 +391,8 @@ NumericVector cavi_update_chi(double m_beta_pg, double s_beta_pg,
 
 // [[Rcpp::export]]
 double calculate_E_log_Y_given_theta(NumericMatrix y, NumericMatrix x, 
-                                     NumericVector m_t, NumericVector s_t, 
-                                     NumericVector m_c, NumericVector s_c,
+                                     NumericVector m_z, NumericVector s_z, 
+                                     NumericVector m_lambda, NumericVector s_lambda,
                                      NumericMatrix m_alpha, NumericMatrix s_alpha,
                                      NumericMatrix m_beta, NumericMatrix s_beta,
                                      NumericVector a_tau, NumericVector b_tau,
@@ -413,8 +413,8 @@ double calculate_E_log_Y_given_theta(NumericMatrix y, NumericMatrix x,
   for(int g = 0; g < G; g++) {
     double e_log_tau = (boost::math::digamma(a_tau[g]) - log(b_tau[g]));
     ely += N / 2 * (e_log_tau - log(2 * pi));
-    double fg = calculate_fg(g, y,m_t,  s_t, 
-                 m_c, s_c, m_mu, s_mu,
+    double fg = calculate_fg(g, y,m_z,  s_z, 
+                 m_lambda, s_lambda, m_mu, s_mu,
                  alpha_sum, beta_sum,
                  alpha_square_sum, beta_square_sum);
     ely -= a_tau[g] / (2 * b_tau[g]) * fg;
@@ -423,8 +423,8 @@ double calculate_E_log_Y_given_theta(NumericMatrix y, NumericMatrix x,
 }
 
 // [[Rcpp::export]]
-double calculate_E_log_p(NumericVector m_t, NumericVector s_t, 
-                             NumericVector m_c, NumericVector s_c,
+double calculate_E_log_p(NumericVector m_z, NumericVector s_z, 
+                             NumericVector m_lambda, NumericVector s_lambda,
                              NumericMatrix m_alpha, NumericMatrix s_alpha,
                              NumericMatrix m_beta, NumericMatrix s_beta,
                              NumericVector a_tau, NumericVector b_tau,
@@ -433,20 +433,20 @@ double calculate_E_log_p(NumericVector m_t, NumericVector s_t,
                              NumericVector q, double tau_q, double tau_mu, double tau_c,
                              double a, double b, double tau_alpha,
                              double a_beta, double b_beta) {
-  int N = m_t.size();
-  int G = m_c.size();
+  int N = m_z.size();
+  int G = m_lambda.size();
   int P = a_chi.nrow();
   
   double elp = 0.0;
   double pi = 3.14159265359;
   
   for(int i = 0; i < N; i++) {
-    elp += 0.5 * log(tau_q / (2*pi)) - (tau_q / 2) * (m_t[i] * m_t[i] + s_t[i] - 2 * m_t[i] * q[i] + q[i] * q[i]);
+    elp += 0.5 * log(tau_q / (2*pi)) - (tau_q / 2) * (m_z[i] * m_z[i] + s_z[i] - 2 * m_z[i] * q[i] + q[i] * q[i]);
   }
   
   for(int g = 0; g < G; g++) {
     elp += 0.5 * log(tau_mu / (2*pi)) - tau_mu / 2 * (m_mu[g] * m_mu[g] + s_mu[g]); 
-    elp += 0.5 * log(tau_c / (2*pi)) - tau_c / 2 * (m_c[g] * m_c[g] + s_c[g]);
+    elp += 0.5 * log(tau_c / (2*pi)) - tau_c / 2 * (m_lambda[g] * m_lambda[g] + s_lambda[g]);
     
     elp += (a - 1) * (boost::math::digamma(a_tau[g]) - log(b_tau[g])) -
       a_tau[g] / b_tau[g] * b + a * log(b) - boost::math::lgamma(a);
@@ -468,7 +468,7 @@ double calculate_E_log_p(NumericVector m_t, NumericVector s_t,
 
 // [[Rcpp::export]]
 
-double calculate_E_log_q(NumericVector s_t, NumericVector s_c,
+double calculate_E_log_q(NumericVector s_z, NumericVector s_lambda,
                   NumericMatrix s_alpha, NumericMatrix s_beta,
                   NumericVector a_tau, NumericVector b_tau,
                   NumericVector s_mu,
@@ -477,18 +477,18 @@ double calculate_E_log_q(NumericVector s_t, NumericVector s_c,
   double elq = 0.0;
   double pi = 3.14159265359;
   
-  int N = s_t.size();
-  int G = s_c.size();
+  int N = s_z.size();
+  int G = s_lambda.size();
   int P = a_chi.nrow();
   
   for(int i = 0; i < N; i++)
-    elq -= 0.5 * log(s_t[i]) - 0.5 *  log(2*pi);
+    elq -= 0.5 * log(s_z[i]) - 0.5 *  log(2*pi);
   
   for(int g = 0; g < G; g++) {
     if(model_mu == 1) {
       elq -= 0.5 * log(s_mu[g]) - 0.5 *  log(2 * pi); 
     }
-    elq -= 0.5 * log(s_c[g]) - 0.5 * log(2 * pi);
+    elq -= 0.5 * log(s_lambda[g]) - 0.5 * log(2 * pi);
     
     elq += (a_tau[g] - 1) *
       (boost::math::digamma(a_tau[g]) - log(b_tau[g])) - a_tau[g] +
@@ -510,8 +510,8 @@ double calculate_E_log_q(NumericVector s_t, NumericVector s_c,
 
 // [[Rcpp::export]]
 NumericVector calculate_elbo(NumericMatrix y, NumericMatrix x, 
-                      NumericVector m_t, NumericVector s_t, 
-                      NumericVector m_c, NumericVector s_c,
+                      NumericVector m_z, NumericVector s_z, 
+                      NumericVector m_lambda, NumericVector s_lambda,
                       NumericMatrix m_alpha, NumericMatrix s_alpha,
                       NumericMatrix m_beta, NumericMatrix s_beta,
                       NumericVector a_tau, NumericVector b_tau,
@@ -522,15 +522,15 @@ NumericVector calculate_elbo(NumericMatrix y, NumericMatrix x,
                       double a_beta, double b_beta, int model_mu) {
   
   double ely = calculate_E_log_Y_given_theta( y,  x,
-                                              m_t,  s_t,
-                                              m_c,  s_c,
+                                              m_z,  s_z,
+                                              m_lambda,  s_lambda,
                                               m_alpha,  s_alpha,
                                               m_beta,  s_beta,
                                               a_tau,  b_tau,
                                               m_mu,  s_mu);
   
-  double elp = calculate_E_log_p( m_t,  s_t,
-                                  m_c,  s_c,
+  double elp = calculate_E_log_p( m_z,  s_z,
+                                  m_lambda,  s_lambda,
                                   m_alpha,  s_alpha,
                                   m_beta,  s_beta,
                                   a_tau,  b_tau,
@@ -540,7 +540,7 @@ NumericVector calculate_elbo(NumericMatrix y, NumericMatrix x,
                                   a,  b,  tau_alpha,
                                   a_beta,  b_beta);
 
-  double elq = calculate_E_log_q( s_t,  s_c,
+  double elq = calculate_E_log_q( s_z,  s_lambda,
                  s_alpha,  s_beta,
                  a_tau,  b_tau,
                  s_mu,

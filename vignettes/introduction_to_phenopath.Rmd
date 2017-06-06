@@ -32,8 +32,8 @@ fit <- clvm(sim$y, pst_init = sim$z, matrix(sim$x), elbo_tol = 1e-7)
 plot results
 
 ```{r plot-results}
-plot(sim$z, fit$m_t)
-cor(sim$z, fit$m_t)
+plot(sim$z, fit$m_z)
+cor(sim$z, fit$m_z)
 ```
 
 0.9980693
