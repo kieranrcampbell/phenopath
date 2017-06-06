@@ -1,8 +1,8 @@
-Package: clvm
+Package: phenopath
 Type: Package
-Title: What the Package Does in One 'Title Case' Line
+Title: Genomic trajectories for heterogeneous genetic and environmental backgrounds
 Version: 1.0
-Date: 2016-12-30
+Date: 2017-7-6
 Author: Kieran Campbell
 Maintainer: Kieran Campbell <kieranrcampbell@gmail.com>
 Description: One paragraph description of what the package does as one
