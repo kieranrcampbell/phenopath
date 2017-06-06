@@ -6,9 +6,10 @@
 \usage{
 clvm(y, x, maxiter = 10000, elbo_tol = 0.005, thin = 1, verbose = TRUE,
   pst_init = 1, tau_q = 1, tau_mu = 1, tau_c = 1, a = 2, b = 2,
-  tau_alpha = 1, a_beta = 0.01, b_beta = 0.01, q = rep(0, nrow(y)),
-  model_mu = FALSE, true_beta = NULL, true_c = NULL, true_tau = NULL,
-  scale_y = TRUE, update_pst = TRUE)
+  tau_alpha = 1, a_beta = 10, b_beta = 1, q = rep(0, nrow(y)),
+  model_mu = FALSE, true_beta = NULL, true_alpha = NULL,
+  true_chi = NULL, true_c = NULL, true_tau = NULL, scale_y = TRUE,
+  update_pst = TRUE)
 }
 \arguments{
 \item{y}{A N-by-G (dynamic) input matrix}
