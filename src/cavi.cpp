@@ -122,7 +122,6 @@ NumericMatrix cavi_update_pst(NumericMatrix y, NumericMatrix x,
   
   int N = y.nrow();
   int G = y.ncol();
-  int P = x.ncol();
 
   NumericMatrix pst_update(N, 2);
   
@@ -546,8 +545,7 @@ NumericVector calculate_elbo(NumericMatrix y, NumericMatrix x,
                  a_tau,  b_tau,
                  s_mu,
                  a_chi,  b_chi, model_mu);
-  
-  // std::cout << ely << "\t" << elp << "\t" << elq << std::endl;
+
   
   return NumericVector::create(ely, elp, elq);
 }
