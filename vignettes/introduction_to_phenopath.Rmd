@@ -26,7 +26,7 @@ sim <- simulate_phenopath()
 See results:
 
 ```{r see-results, eval = FALSE}
-fit <- clvm(sim$y, pst_init = sim$z, matrix(sim$x), elbo_tol = 1e-7)
+fit <- phenopath(sim$y, sim$x, z_init = sim$z,elbo_tol = 1e-7)
 ```
 
 plot results

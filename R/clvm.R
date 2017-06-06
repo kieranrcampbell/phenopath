@@ -23,7 +23,7 @@ library(Rcpp)
 #' @param a_beta Hyperparameter a_beta
 #' @param b_beta Hyperparameter b_beta
 #' @param q Priors on the latent variables
-#' @param pst_init KIERAN WRITE
+#' @param z_init KIERAN WRITE
 #' 
 #' @return 
 #' A list whose entries correspond to the converged values of the
@@ -34,10 +34,10 @@ library(Rcpp)
 #' 
 #' @export
 clvm <- function(y, x, maxiter = 1e4,
-                 elbo_tol = 0.005,
+                 elbo_tol = 1e-5,
                  thin = 1,
                  verbose = TRUE,
-                 pst_init = 1,
+                 z_init = 1,
                  tau_q = 1,
                  tau_mu = 1,
                  tau_c = 1,
@@ -84,14 +84,14 @@ clvm <- function(y, x, maxiter = 1e4,
   ## (2) A single integer specifying which PC to initialise to
   ## (3) A text character "random" in which case they're drawn N(0,1)
 
-  if(length(pst_init) == 1 && is.numeric(pst_init)) {  
-    m_z <- prcomp(scale(y))$x[,pst_init]
+  if(length(z_init) == 1 && is.numeric(z_init)) {  
+    m_z <- prcomp(scale(y))$x[,z_init]
     m_z <- (m_z - mean(m_z)) / sd(m_z)
-  } else if(length(pst_init) == N && is.numeric(pst_init)) {
-    m_z <- pst_init
-  } else if(pst_init == "random") {
+  } else if(length(z_init) == N && is.numeric(z_init)) {
+    m_z <- z_init
+  } else if(z_init == "random") {
     m_z <- rnorm(N)
-  } else if(pst_init == "pc1_with_noise") {
+  } else if(z_init == "pc1_with_noise") {
     m_z <- prcomp(scale(y))$x[,1]
     m_z <- (m_z - mean(m_z)) / sd(m_z)
     m_z <- rnorm(N, m_z)

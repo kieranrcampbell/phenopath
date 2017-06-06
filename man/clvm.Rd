@@ -4,8 +4,8 @@
 \alias{clvm}
 \title{Fit a CLVM Model}
 \usage{
-clvm(y, x, maxiter = 10000, elbo_tol = 0.005, thin = 1, verbose = TRUE,
-  pst_init = 1, tau_q = 1, tau_mu = 1, tau_c = 1, a = 2, b = 2,
+clvm(y, x, maxiter = 10000, elbo_tol = 1e-05, thin = 1, verbose = TRUE,
+  z_init = 1, tau_q = 1, tau_mu = 1, tau_c = 1, a = 2, b = 2,
   tau_alpha = 1, a_beta = 10, b_beta = 1, q = rep(0, nrow(y)),
   model_mu = FALSE, scale_y = TRUE)
 }
@@ -24,7 +24,7 @@ re-calculating the elbo}
 
 \item{verbose}{Print convergence messages}
 
-\item{pst_init}{KIERAN WRITE}
+\item{z_init}{KIERAN WRITE}
 
 \item{tau_q}{Hyperparameter tau_q}
 
