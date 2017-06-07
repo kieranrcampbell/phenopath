@@ -31,7 +31,7 @@ fit <- phenopath(sim$y, sim$x, z_init = sim$z,elbo_tol = 1e-7)
 
 plot results
 
-```{r plot-results}
+```{r plot-results, eval = FALSE}
 plot(sim$z, fit$m_z)
 cor(sim$z, fit$m_z)
 ```

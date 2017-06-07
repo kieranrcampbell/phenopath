@@ -11,7 +11,9 @@ License: GPL (>= 2)
 Imports:
     Rcpp (>= 0.12.8), 
     ggplot2,
-    Biobase
+    Biobase,
+    dplyr,
+    tibble
 LinkingTo: Rcpp, BH
 RoxygenNote: 5.0.1
 Suggests: knitr,
