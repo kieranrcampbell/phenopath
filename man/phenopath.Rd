@@ -49,7 +49,9 @@ The model is fitted using mean-field co-ordinate ascent variational inference.
 \details{
 \strong{Input expression}
 
-If an \code{ExpressionSet} is provided, \code{exprs(...)} is used
+If an \code{ExpressionSet} is provided, \code{exprs(...)} is used. This is assumed to be in
+a form that is suitably normalised and approximately normal, such as \eqn{\log_2(\text{TPM} +1)} or 
+similar.
 
 \strong{Encoding covariates}
 
@@ -66,7 +68,6 @@ Addition arguments to \code{...}
 \examples{
 sim <- simulate_phenopath() # returns a list with gene expression in y and covariates in x
 fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
-
 
 }
 

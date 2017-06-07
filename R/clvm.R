@@ -23,13 +23,30 @@ library(Rcpp)
 #' @param a_beta Hyperparameter a_beta
 #' @param b_beta Hyperparameter b_beta
 #' @param q Priors on the latent variables
-#' @param z_init KIERAN WRITE
+#' @param model_mu Logical - should a gene-specific intercept term be modelled?
+#' @param scale_y Logical - should the expression matrix be centre scaled?
+#' @param z_init The initialisation of the latent trajectory. Should be one of
+#' \enumerate{
+#' \item A positive integer describing which principal component of the data should
+#' be used for initialisation (default 1), \emph{or}
+#' \item A numeric vector of length number of samples to be used directly for initialisation, \emph{or}
+#' \item The text character \code{"random"}, for random initialisation from a standard
+#' normal distribution.
+#' }
 #' 
+#' @import Rcpp
 #' @return 
 #' A list whose entries correspond to the converged values of the
 #' variational parameters along with the ELBO.
 #' 
+#' @importFrom stats coef lm prcomp
+#' @importFrom stats rnorm sd
+#' 
 #' @useDynLib phenopath
+#' 
+#' @examples 
+#' sim <- simulate_phenopath()
+#' fit <- clvm(sim$y, sim$x)
 #' 
 #' 
 #' @export
@@ -53,7 +70,7 @@ clvm <- function(y, x, maxiter = 1e4,
   P <- ncol(x)
   
   if(scale_y) {
-    y <- scale(y, scale = T)
+    y <- scale(y)
   }
   
   ## Parameter initialisation
@@ -207,7 +224,12 @@ clvm <- function(y, x, maxiter = 1e4,
 
 
 #' Scale a vector to have mean 0 and variance 1
+#' 
+#' Scales vector to mean 0 variance 1 unless input standard deviation is 0
+#' in which case original vector is returned
 #' @keywords internal
+#' @param x Input vector to scale
+#' @return Scaled vector
 scale_vec <- function(x) {
   std_dev <- sd(x)
   if(std_dev != 0) {

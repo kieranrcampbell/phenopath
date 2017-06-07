@@ -24,7 +24,14 @@ re-calculating the elbo}
 
 \item{verbose}{Print convergence messages}
 
-\item{z_init}{KIERAN WRITE}
+\item{z_init}{The initialisation of the latent trajectory. Should be one of
+\enumerate{
+\item A positive integer describing which principal component of the data should
+be used for initialisation (default 1), \emph{or}
+\item A numeric vector of length number of samples to be used directly for initialisation, \emph{or}
+\item The text character \code{"random"}, for random initialisation from a standard
+normal distribution.
+}}
 
 \item{tau_q}{Hyperparameter tau_q}
 
@@ -43,6 +50,10 @@ re-calculating the elbo}
 \item{b_beta}{Hyperparameter b_beta}
 
 \item{q}{Priors on the latent variables}
+
+\item{model_mu}{Logical - should a gene-specific intercept term be modelled?}
+
+\item{scale_y}{Logical - should the expression matrix be centre scaled?}
 }
 \value{
 A list whose entries correspond to the converged values of the
@@ -51,5 +62,11 @@ variational parameters along with the ELBO.
 \description{
 Fit a covariate latent variable model using coordinate ascent
 variational inference.
+}
+\examples{
+sim <- simulate_phenopath()
+fit <- clvm(sim$y, sim$x)
+
+
 }
 

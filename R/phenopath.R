@@ -39,7 +39,9 @@
 #' @details
 #' \strong{Input expression}
 #' 
-#' If an \code{ExpressionSet} is provided, \code{exprs(...)} is used
+#' If an \code{ExpressionSet} is provided, \code{exprs(...)} is used. This is assumed to be in
+#' a form that is suitably normalised and approximately normal, such as \eqn{\log_2(\text{TPM} +1)} or 
+#' similar.
 #'
 #' \strong{Encoding covariates}
 #' 
@@ -58,7 +60,8 @@
 #' sim <- simulate_phenopath() # returns a list with gene expression in y and covariates in x
 #' fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
 #' 
-#' 
+#' @importFrom methods is
+#' @importFrom stats model.matrix
 #' @export
 phenopath <- function(exprs_obj, x, 
                       elbo_tol = 1e-5, z_init = 1, ...) {
@@ -117,7 +120,7 @@ phenopath <- function(exprs_obj, x,
     x_mat <- matrix(xx)
   }
   
-  cl_fit <- clvm(y, x_mat, ...)
+  cl_fit <- clvm(y, x_mat, elbo_tol = elbo_tol, z_init = z_init, ...)
   
   cl_fit$N <- nrow(y)
   cl_fit$G <- ncol(y)

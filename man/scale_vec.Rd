@@ -6,8 +6,15 @@
 \usage{
 scale_vec(x)
 }
+\arguments{
+\item{x}{Input vector to scale}
+}
+\value{
+Scaled vector
+}
 \description{
-Scale a vector to have mean 0 and variance 1
+Scales vector to mean 0 variance 1 unless input standard deviation is 0
+in which case original vector is returned
 }
 \keyword{internal}
 

@@ -7,9 +7,17 @@
 plot_elbo(fit)
 }
 \arguments{
-\item{fit}{A CLVM fit}
+\item{fit}{An object returned by a call to \code{phenopath}}
+}
+\value{
+A \code{ggplot2} object of the ELBO against the number of iterations
 }
 \description{
-Plots the ELBO
+Plots the evidence lower bound (ELBO) as a function of iterations
+}
+\examples{
+sim <- simulate_phenopath()
+fit <- phenopath(sim$y, sim$x)
+plot_elbo(fit)
 }
 

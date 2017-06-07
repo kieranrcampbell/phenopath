@@ -1,7 +1,7 @@
 Package: phenopath
 Type: Package
 Title: Genomic trajectories with heterogeneous genetic and environmental backgrounds
-Version: 1.0
+Version: 0.99.01
 Date: 2017-7-6
 Author: Kieran Campbell
 Maintainer: Kieran Campbell <kieranrcampbell@gmail.com>
@@ -9,11 +9,15 @@ Description: One paragraph description of what the package does as one
     or more full sentences.
 License: GPL (>= 2)
 Imports:
-    Rcpp (>= 0.12.8), 
-    ggplot2,
-    Biobase,
-    dplyr,
-    tibble
+  Rcpp (>= 0.12.8), 
+  methods,
+  stats,
+  Biobase,
+  dplyr,
+  tibble
+Suggests:
+  ggplot2
+biocViews: RNASeq, GeneExpression, Bayesian, SingleCell, PrincipalComponent
 LinkingTo: Rcpp, BH
 RoxygenNote: 5.0.1
 Suggests: knitr,
