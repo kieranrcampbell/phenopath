@@ -209,7 +209,12 @@ clvm <- function(y, x, maxiter = 1e4,
 #' Scale a vector to have mean 0 and variance 1
 #' @keywords internal
 scale_vec <- function(x) {
-  (x - mean(x)) / sd(x)
+  std_dev <- sd(x)
+  if(std_dev != 0) {
+    return( (x - mean(x)) / std_dev )
+  } else {
+    return(x)
+  }
 }
 
 

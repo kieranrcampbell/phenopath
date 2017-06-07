@@ -38,7 +38,22 @@ cor(sim$z, fit$m_z)
 
 0.9980693
 
+PCA
 
+```{r sim-pca, eval = F}
+sim <- simulate_phenopath(N = 200, 
+                          G_de = 0, G_pst = 100, G_pst_beta = 10,
+                          G_de_pst_beta = 10)
+
+pca_df <- as_data_frame(prcomp(sim$y)$x[,1:2]) %>% 
+  mutate(z = sim[['z']], x = sim[['x']])
+
+ggplot(pca_df, aes(x = PC1, y = PC2, color = z)) +
+  geom_point() 
+
+ggplot(pca_df, aes(x = PC1, y = PC2, color = factor(x))) +
+  geom_point() 
+```
 
 ## Vignette Info
 
