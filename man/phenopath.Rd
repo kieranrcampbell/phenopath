@@ -4,12 +4,12 @@
 \alias{phenopath}
 \title{PhenoPath - genomic trajectories with heterogeneous backgrounds}
 \usage{
-phenopath(exprs_obj, x, ...)
+phenopath(exprs_obj, x, elbo_tol = 1e-05, z_init = 1, ...)
 }
 \arguments{
 \item{exprs_obj}{Input gene expression, either
 \enumerate{
-\item An \code{ExpressionSet} object such as an \code{SCESet}, \emph{or}
+\item An \linkS4class{ExpressionSet} object such as an \linkS4class{SCESet}, \emph{or}
 \item A cell-by-gene matrix of normalised expression values in log form.
 }}
 
@@ -19,14 +19,54 @@ phenopath(exprs_obj, x, ...)
 \code{ExpressionSet}, \emph{or}
 \item A numeric of factor vector of length equal to the number of cells
 }}
+
+\item{elbo_tol}{The relative pct change in the ELBO below which is considered converged.
+See convergence section in details below.}
+
+\item{z_init}{The initialisation of the latent trajectory. Should be one of
+\enumerate{
+\item A positive integer describing which principal component of the data should
+be used for initialisation (default 1), \emph{or}
+\item A numeric vector of length number of samples to be used directly for initialisation, \emph{or}
+\item The text character \code{"random"}, for random initialisation from a standard
+normal distribution.
+}}
+
+\item{...}{Additional arguments to be passed to \code{\link{clvm}}. See description
+below for more details or call \code{?clvm}.}
+}
+\value{
+An S3 structure with the following entries:
 }
 \description{
 PhenoPath learns genomic trajectories in the presence of heterogenous environmental
-and genetic backgrounds using scalable Bayesian variational inference.
+and genetic backgrounds. It takes input gene expression measurements that are modelled
+by a single unobserved factor (the "trajectory"). The regulation of genes along the
+trajectory is perturbed by an additional set of covariates (such as genetic or
+environmental status) allowing for the identification of covariate-trajectory interactions.
+The model is fitted using mean-field co-ordinate ascent variational inference.
 }
 \details{
+\strong{Input expression}
+
 If an \code{ExpressionSet} is provided, \code{exprs(...)} is used
 
+\strong{Encoding covariates}
+
 If \code{x} is the name of...
+
+\strong{Convergence of variational inference}
+
+\code{plot_elbo}
+
+\strong{Additional arguments}
+
+Addition arguments to \code{...}
+}
+\examples{
+sim <- simulate_phenopath() # returns a list with gene expression in y and covariates in x
+fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
+
+
 }
 
