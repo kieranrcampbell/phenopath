@@ -21,4 +21,3 @@ fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
 z <- trajectory(fit)
 
 }
-

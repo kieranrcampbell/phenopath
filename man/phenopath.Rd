@@ -37,6 +37,12 @@ below for more details or call \code{?clvm}.}
 }
 \value{
 An S3 structure with the following entries:
+\itemize{
+\item \code{m_z} The converged mean estimates of the trajectory
+\item \code{s_z} The converged standard deviation estimates of z
+\item \code{m_beta} A P-by-G matrix of interaction coefficients
+\item \code{s_beta} A P-by-G matrix of interaction standard deviations
+}
 }
 \description{
 PhenoPath learns genomic trajectories in the presence of heterogenous environmental
@@ -59,15 +65,33 @@ If \code{x} is the name of...
 
 \strong{Convergence of variational inference}
 
-\code{plot_elbo}
+It is strongly recommended to call \code{plot_elbo(phenopath_fit)} after the fitting procedure to
+ensure the ELBO has approximately converged (though convergence metrics are printed during the
+fitting process). For a good introduction to variational inference see Blei, D.M., Kucukelbir, A. & McAuliffe, J.D., 2017. Variational Inference: A Review for Statisticians. Journal of the American Statistical Association.
 
 \strong{Additional arguments}
 
-Addition arguments to \code{...}
+Addition arguments to \code{clvm} are passed via \code{...}. For full documentation, call \code{?clvm}.
+Some notable options:
+\itemize{
+\item \code{thin} - The ELBO is expensive to compute for larger datasets. The model will
+compute the ELBO and compare convergence every \code{thin} iterations.
+\item \code{q} and \code{tau_q} - Priors (such as capture times) for the latent space. Note that
+\code{model_mu} should be true if \code{q} is non-zero.
+\item \code{scale_y} By default the input expression is centre-scaled for each gene. If \code{scale_y}
+is \code{FALSE} this does not happen - but note that \code{model_mu} should be \code{TRUE} in such a case.
+}
 }
 \examples{
 sim <- simulate_phenopath() # returns a list with gene expression in y and covariates in x
 fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
 
-}
+# Extract the trajectory
+z <- trajectory(fit)
 
+}
+\seealso{
+\code{\link{clvm}} for the underlying CAVI function, \code{\link{trajectory}}
+to extract the latent trajectory, \code{\link{interaction_effects}} for the interaction effect
+sizes, \code{\link{significant_interactions}} for the results of Bayesian significance testing.
+}

@@ -69,4 +69,3 @@ fit <- clvm(sim$y, sim$x)
 
 
 }
-

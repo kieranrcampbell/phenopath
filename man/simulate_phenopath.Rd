@@ -49,4 +49,3 @@ that is modulated by covariate interactions
 \examples{
 sim <- simulate_phenopath()
 }
-

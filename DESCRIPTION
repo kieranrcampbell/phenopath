@@ -14,12 +14,14 @@ Imports:
   stats,
   Biobase,
   dplyr,
-  tibble
-Suggests:
+  tibble,
   ggplot2
+Suggests:
+    knitr,
+    rmarkdown,
+    tidyr,
+    forcats
 biocViews: RNASeq, GeneExpression, Bayesian, SingleCell, PrincipalComponent
 LinkingTo: Rcpp, BH
-RoxygenNote: 5.0.1
-Suggests: knitr,
-    rmarkdown
+RoxygenNote: 6.0.1
 VignetteBuilder: knitr

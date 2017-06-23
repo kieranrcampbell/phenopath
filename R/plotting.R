@@ -13,5 +13,5 @@
 plot_elbo <- function(fit) {
   stopifnot(is(fit, "phenopath_fit"))
   elbo <- fit$elbos[-(1)]
-  ggplot2::qplot(seq_along(elbo) + 1, elbo, geom = c("point", "line")) + xlab("Iter") + ylab("ELBO")
+  ggplot2::qplot(fit$thin * seq_along(elbo) + 1, elbo, geom = c("point", "line")) + xlab("Iter") + ylab("ELBO")
 }

@@ -17,4 +17,3 @@ Scales vector to mean 0 variance 1 unless input standard deviation is 0
 in which case original vector is returned
 }
 \keyword{internal}
-

@@ -18,4 +18,3 @@ iteractions between the latent trajectory and covariates. Significant
 features are designated as those where the variational mean of the interaction
 coefficient falls outside the \eqn{n \sigma} interval of 0.
 }
-

@@ -20,4 +20,3 @@ sim <- simulate_phenopath()
 fit <- phenopath(sim$y, sim$x)
 plot_elbo(fit)
 }
-

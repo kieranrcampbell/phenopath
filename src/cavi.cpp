@@ -2,8 +2,8 @@
 
 #include <Rcpp.h>
 #include <cmath>
-#include <boost/math/special_functions/digamma.hpp>
-#include <boost/math/special_functions/gamma.hpp>
+// #include <boost/math/special_functions/digamma.hpp>
+// #include <boost/math/special_functions/gamma.hpp>
 
 using namespace Rcpp;
 using namespace std;
@@ -411,7 +411,7 @@ double calculate_E_log_Y_given_theta(NumericMatrix y, NumericMatrix x,
   NumericMatrix beta_square_sum = greek_square_exp(m_beta, s_beta, x);
   
   for(int g = 0; g < G; g++) {
-    double e_log_tau = (boost::math::digamma(a_tau[g]) - log(b_tau[g]));
+    double e_log_tau = (digamma(NumericVector::create(a_tau[g]))[0] - log(b_tau[g]));
     ely += N / 2 * (e_log_tau - log(2 * pi));
     double fg = calculate_fg(g, y,m_z,  s_z, 
                  m_lambda, s_lambda, m_mu, s_mu,
@@ -448,18 +448,18 @@ double calculate_E_log_p(NumericVector m_z, NumericVector s_z,
     elp += 0.5 * log(tau_mu / (2*pi)) - tau_mu / 2 * (m_mu[g] * m_mu[g] + s_mu[g]); 
     elp += 0.5 * log(tau_c / (2*pi)) - tau_c / 2 * (m_lambda[g] * m_lambda[g] + s_lambda[g]);
     
-    elp += (a - 1) * (boost::math::digamma(a_tau[g]) - log(b_tau[g])) -
-      a_tau[g] / b_tau[g] * b + a * log(b) - boost::math::lgamma(a);
+    elp += (a - 1) * (digamma(NumericVector::create(a_tau[g]))[0] - log(b_tau[g])) -
+      a_tau[g] / b_tau[g] * b + a * log(b) - lgamma(a);
     
     for(int p = 0; p < P; p++) {
       elp += 0.5 * log(tau_alpha / (2*pi)) - tau_alpha / 2 * (m_alpha(p,g) * m_alpha(p,g) + s_alpha(p,g)); 
       
-      elp += 0.5 * (boost::math::digamma(a_chi(p,g)) - log(b_chi(p,g))) - 
+      elp += 0.5 * (digamma(NumericVector::create(a_chi(p,g)))[0] - log(b_chi(p,g))) - 
         0.5 * log(2 * pi) -
         a_chi(p,g) / (2 * b_chi(p,g)) * (m_beta(p,g) * m_beta(p,g) + s_beta(p,g));
       
-      elp += (a_beta - 1) * (boost::math::digamma(a_chi(p,g)) - log(b_chi(p,g))) -
-        a_chi(p,g) / b_chi(p,g) * b_beta + a_beta * log(b_beta) - boost::math::lgamma(a_beta);
+      elp += (a_beta - 1) * (digamma(NumericVector::create(a_chi(p,g)))[0] - log(b_chi(p,g))) -
+        a_chi(p,g) / b_chi(p,g) * b_beta + a_beta * log(b_beta) - lgamma(a_beta);
     }
   }
   
@@ -491,8 +491,8 @@ double calculate_E_log_q(NumericVector s_z, NumericVector s_lambda,
     elq -= 0.5 * log(s_lambda[g]) - 0.5 * log(2 * pi);
     
     elq += (a_tau[g] - 1) *
-      (boost::math::digamma(a_tau[g]) - log(b_tau[g])) - a_tau[g] +
-      a_tau[g] * log(b_tau[g]) - boost::math::lgamma(a_tau[g]);
+      (digamma(NumericVector::create(a_tau[g]))[0] - log(b_tau[g])) - a_tau[g] +
+      a_tau[g] * log(b_tau[g]) - lgamma(a_tau[g]);
     
     for(int p = 0; p < P; p++) {
       elq -= 0.5 * log(s_alpha(p,g)) - 0.5 * log(2 * pi); 
@@ -500,8 +500,8 @@ double calculate_E_log_q(NumericVector s_z, NumericVector s_lambda,
       elq -= 0.5 * log(s_beta(p,g)) - 0.5 * log(2 * pi);
       
       elq += (a_chi(p,g) - 1) *
-        (boost::math::digamma(a_chi(p,g)) - log(b_chi(p,g))) - a_chi(p,g) +
-        a_chi(p,g) * log(b_chi(p,g)) - boost::math::lgamma(a_chi(p,g));
+        (digamma(NumericVector::create(a_chi(p,g)))[0] - log(b_chi(p,g))) - a_chi(p,g) +
+        a_chi(p,g) * log(b_chi(p,g)) - lgamma(a_chi(p,g));
     }
   }
   

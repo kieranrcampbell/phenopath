@@ -131,7 +131,7 @@ clvm <- function(y, x, maxiter = 1e4,
   
   
   if(verbose) {
-    cat("ELBO\t\tChange (%) \n")
+    cat("Iteration\tELBO\tChange (%) \n")
   }
 
   elbo_old <- -Inf
@@ -199,9 +199,9 @@ clvm <- function(y, x, maxiter = 1e4,
       
       elbo <- elbo_vec[1] + elbo_vec[2] - elbo_vec[3]
 
-      delta_elbo <- abs((elbo - elbo_old) / elbo * 100)
+      delta_elbo <- abs((elbo - elbo_old) / elbo * 100 / thin)
       if(verbose) {
-        cat(paste(elbo, delta_elbo, sep = "\t"), "\n")
+        cat(paste("[", i, "] \t", elbo, "\t", delta_elbo), "\n")
       }
       elbo_old <- elbo
       elbos <- c(elbos, elbo)
@@ -216,7 +216,7 @@ clvm <- function(y, x, maxiter = 1e4,
   rlist <- list(m_z = m_z, s_z = s_z, m_lambda = m_lambda, s_lambda = s_lambda, m_mu = m_mu, m_alpha = m_alpha,
                 s_alpha = s_alpha, a_tau = a_tau, b_tau = b_tau,
                 m_beta = m_beta, s_beta = s_beta, chi_exp = a_chi / b_chi,
-                elbos = elbos)
+                elbos = elbos, thin = thin)
   return(rlist)
 }
   

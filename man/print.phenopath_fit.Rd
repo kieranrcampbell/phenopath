@@ -22,4 +22,3 @@ sim <- simulate_phenopath() # returns a list with gene expression in y and covar
 fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
 print(fit)
 }
-

@@ -10,4 +10,3 @@ simulate_one_gene(N, pst, x, alpha = 0, c = 0, beta = 0, tau = 1e+06)
 Simulate one gene from the model given paramters, z and covariates
 }
 \keyword{internal}
-
