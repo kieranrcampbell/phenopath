@@ -205,6 +205,23 @@ interaction_effects <- function(phenopath_fit) {
   return(phenopath_fit$m_beta[1:P,,drop=TRUE])
 }
 
+#' Get the interaction standard deviations
+#' 
+#' @param phenopath_fit An object of class \code{phenopath_fit}
+#' @return TODO
+#' 
+#' @export
+#' 
+#' @examples 
+#' sim <- simulate_phenopath() # returns a list with gene expression in y and covariates in x
+#' fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
+#' beta_sd <- interaction_sds(fit)
+interaction_sds <- function(phenopath_fit) {
+  stopifnot(is(phenopath_fit, "phenopath_fit"))
+  P <- nrow(phenopath_fit$m_beta)
+  return(sqrt(phenopath_fit$s_beta[1:P,,drop=TRUE]))
+}
+
 #' Significance testing for interaction features
 #' 
 #' Given the results of \code{clvm}, decide which features show significant
@@ -225,5 +242,6 @@ significant_interactions <- function(phenopath_fit, n = 2) {
   sig <- sapply(seq_len(nrow(m_beta)), function(i) {
     m_beta[i,] - n * pos_sd[i,] > 0 | m_beta[i,] + n * pos_sd[i,] < 0
   })
+  if(ncol(sig) == 1) sig <- as.vector(sig)
   return(sig)
 }

@@ -3,6 +3,7 @@
 S3method(print,phenopath_fit)
 export(clvm)
 export(interaction_effects)
+export(interaction_sds)
 export(phenopath)
 export(plot_elbo)
 export(significant_interactions)
