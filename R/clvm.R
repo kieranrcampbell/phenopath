@@ -27,11 +27,12 @@ library(Rcpp)
 #' @param scale_y Logical - should the expression matrix be centre scaled?
 #' @param z_init The initialisation of the latent trajectory. Should be one of
 #' \enumerate{
-#' \item A positive integer describing which principal component of the data should
-#' be used for initialisation (default 1), \emph{or}
-#' \item A numeric vector of length number of samples to be used directly for initialisation, \emph{or}
-#' \item The text character \code{"random"}, for random initialisation from a standard
-#' normal distribution.
+#' \item A positive integer describing which principal component of the data 
+#' should be used for initialisation (default 1), \emph{or}
+#' \item A numeric vector of length number of samples to be used directly 
+#' for initialisation, \emph{or}
+#' \item The text character \code{"random"}, for random initialisation from 
+#' a standard normal distribution.
 #' }
 #' 
 #' @import Rcpp
@@ -144,7 +145,8 @@ clvm <- function(y, x, maxiter = 1e4,
   while(i < maxiter & delta_elbo > elbo_tol) {
     
     if(model_mu) {
-      cumu <- cavi_update_mu(y, x, m_z, m_lambda, m_alpha, m_beta, a_tau, b_tau, tau_mu)
+      cumu <- cavi_update_mu(y, x, m_z, m_lambda, m_alpha, m_beta, 
+                             a_tau, b_tau, tau_mu)
       m_mu <- cumu[,1]; s_mu <- cumu[,2]
     } else {
       m_mu <- rep(0,G)
@@ -152,13 +154,14 @@ clvm <- function(y, x, maxiter = 1e4,
     }
     
     # Update lambda  
-    culam <- cavi_update_lambda(y, x, m_z, s_z, m_alpha, m_beta, a_tau, b_tau,
-                         m_mu, tau_c)
+    culam <- cavi_update_lambda(y, x, m_z, s_z, m_alpha, 
+                                m_beta, a_tau, b_tau,
+                                m_mu, tau_c)
     m_lambda <- culam[,1]; s_lambda <- culam[,2]
 
     # Update tau
-    cut <- cavi_update_tau(y, x, m_z, s_z, m_lambda, s_lambda, m_alpha, m_beta, s_alpha,
-                           s_beta, m_mu, s_mu, a, b)
+    cut <- cavi_update_tau(y, x, m_z, s_z, m_lambda, s_lambda, m_alpha, 
+                           m_beta, s_alpha, s_beta, m_mu, s_mu, a, b)
     a_tau <- cut[,1]; b_tau <- cut[,2]
 
     alpha_sum <- calculate_greek_sum(m_alpha, x)
@@ -167,14 +170,17 @@ clvm <- function(y, x, maxiter = 1e4,
     for(g in 1:G) {
       for(p in 1:P) {
         ## First calculate alpha update
-        cua <- cavi_update_alpha(beta_sum, p-1, g-1, y, x, m_z, m_lambda, m_alpha, m_beta, a_tau, b_tau,
+        cua <- cavi_update_alpha(beta_sum, p-1, g-1, y, x, m_z, 
+                                 m_lambda, m_alpha, m_beta, a_tau, b_tau,
                                  m_mu, tau_alpha)
-        alpha_sum <- update_greek_sum(g-1, p-1, alpha_sum, m_alpha[p,g], cua[1], x)
+        alpha_sum <- update_greek_sum(g-1, p-1, alpha_sum, 
+                                      m_alpha[p,g], cua[1], x)
         m_alpha[p,g] <- cua[1] 
         s_alpha[p,g] <- cua[2]
         
         ## Calculate beta update
-        cub <- cavi_update_beta(alpha_sum, p-1, g-1, y, x, m_z, s_z, m_lambda, m_alpha, m_beta, a_tau,
+        cub <- cavi_update_beta(alpha_sum, p-1, g-1, y, x, m_z, 
+                                s_z, m_lambda, m_alpha, m_beta, a_tau,
                                 b_tau, a_chi, b_chi, m_mu)
         
         beta_sum <- update_greek_sum(g-1, p-1, beta_sum, m_beta[p,g], cub[1], x)
@@ -187,15 +193,18 @@ clvm <- function(y, x, maxiter = 1e4,
       }
     }
 
-    cuz <- cavi_update_z(y, x, m_lambda, m_mu, s_lambda, m_alpha, m_beta, s_beta, a_tau, b_tau, q, tau_q)
+    cuz <- cavi_update_z(y, x, m_lambda, m_mu, s_lambda, 
+                         m_alpha, m_beta, s_beta, a_tau, b_tau, q, tau_q)
     m_z <- cuz[,1]; s_z <- cuz[,2]
 
     ## calculate elbo and report
     if(i %% thin == 0) {
-      elbo_vec <- calculate_elbo(y, x, m_z, s_z, m_lambda, s_lambda, m_alpha, s_alpha, m_beta, 
-                             s_beta, a_tau, b_tau, a_chi, b_chi, m_mu, s_mu, q, tau_q, 
-                             tau_mu, tau_c, a, b, tau_alpha, a_beta, b_beta,
-                             as.integer(model_mu)) 
+      elbo_vec <- calculate_elbo(y, x, m_z, s_z, m_lambda, s_lambda, 
+                                 m_alpha, s_alpha, m_beta, 
+                                 s_beta, a_tau, b_tau, a_chi, 
+                                 b_chi, m_mu, s_mu, q, tau_q, 
+                                 tau_mu, tau_c, a, b, tau_alpha, 
+                                 a_beta, b_beta, as.integer(model_mu)) 
       
       elbo <- elbo_vec[1] + elbo_vec[2] - elbo_vec[3]
 
@@ -213,7 +222,8 @@ clvm <- function(y, x, maxiter = 1e4,
     warning("ELBO not converged")
   }
 
-  rlist <- list(m_z = m_z, s_z = s_z, m_lambda = m_lambda, s_lambda = s_lambda, m_mu = m_mu, m_alpha = m_alpha,
+  rlist <- list(m_z = m_z, s_z = s_z, m_lambda = m_lambda, 
+                s_lambda = s_lambda, m_mu = m_mu, m_alpha = m_alpha,
                 s_alpha = s_alpha, a_tau = a_tau, b_tau = b_tau,
                 m_beta = m_beta, s_beta = s_beta, chi_exp = a_chi / b_chi,
                 elbos = elbos, thin = thin)

@@ -19,6 +19,10 @@ sample_pst_beta()
 
 sample_de_pst_beta()
 }
+\value{
+A length-3 vector of parameters corresponding to the particular 
+simulation regime
+}
 \description{
 Sample parameters from de regime
 

@@ -18,7 +18,7 @@ A string representation of a \code{phenopath_fit} object.
 Print a PhenoPath fit
 }
 \examples{
-sim <- simulate_phenopath() # returns a list with gene expression in y and covariates in x
+sim <- simulate_phenopath() 
 fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
 print(fit)
 }

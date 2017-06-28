@@ -3,11 +3,13 @@
 
 #' PhenoPath - genomic trajectories with heterogeneous backgrounds
 #' 
-#' PhenoPath learns genomic trajectories in the presence of heterogenous environmental
-#' and genetic backgrounds. It takes input gene expression measurements that are modelled
-#' by a single unobserved factor (the "trajectory"). The regulation of genes along the
-#' trajectory is perturbed by an additional set of covariates (such as genetic or
-#' environmental status) allowing for the identification of covariate-trajectory interactions.
+#' PhenoPath learns genomic trajectories in the presence of 
+#' heterogenous environmental and genetic backgrounds. It takes 
+#' input gene expression measurements that are modelled
+#' by a single unobserved factor (the "trajectory"). The regulation 
+#' of genes along the trajectory is perturbed by an additional set of 
+#' covariates (such as genetic or environmental status) allowing for 
+#' the identification of covariate-trajectory interactions.
 #' The model is fitted using mean-field co-ordinate ascent variational inference.
 #' 
 #' @param exprs_obj Input gene expression, either
@@ -19,22 +21,25 @@
 #' \enumerate{
 #' \item The name of a column of \code{pData(exprs_obj)} if \code{exprs_obj} is an
 #' \code{ExpressionSet}, \emph{or}
-#' \item A numeric of factor vector of length equal to the number of cells, \emph{or}
+#' \item A numeric of factor vector of length equal to the 
+#' number of cells, \emph{or}
 #' \item A formula from which to build a model matrix from \code{pData(exprs_obj)}, 
 #' if \code{exprs_obj} is a \linkS4class{ExpressionSet}
 #' }
-#' @param elbo_tol The relative pct change in the ELBO below which is considered converged.
+#' @param elbo_tol The relative pct change in the ELBO below 
+#' which is considered converged.
 #' See convergence section in details below.
 #' @param z_init The initialisation of the latent trajectory. Should be one of
 #' \enumerate{
 #' \item A positive integer describing which principal component of the data should
 #' be used for initialisation (default 1), \emph{or}
-#' \item A numeric vector of length number of samples to be used directly for initialisation, \emph{or}
-#' \item The text character \code{"random"}, for random initialisation from a standard
-#' normal distribution.
+#' \item A numeric vector of length number of samples to be used 
+#' directly for initialisation, \emph{or}
+#' \item The text character \code{"random"}, for random initialisation 
+#' from a standard normal distribution.
 #' }
-#' @param ... Additional arguments to be passed to \code{\link{clvm}}. See description
-#' below for more details or call \code{?clvm}.
+#' @param ... Additional arguments to be passed to \code{\link{clvm}}. 
+#' See description below for more details or call \code{?clvm}.
 #' 
 #' @return An S3 structure with the following entries:
 #' \itemize{
@@ -47,8 +52,10 @@
 #' @details
 #' \strong{Input expression}
 #' 
-#' If an \code{ExpressionSet} is provided, \code{exprs(...)} is used. This is assumed to be in
-#' a form that is suitably normalised and approximately normal, such as \eqn{\log_2(\text{TPM} +1)} or 
+#' If an \code{ExpressionSet} is provided, \code{exprs(...)} is used. 
+#' This is assumed to be in
+#' a form that is suitably normalised and approximately normal, such as 
+#' \eqn{\log_2(\text{TPM} +1)} or 
 #' similar.
 #'
 #' \strong{Encoding covariates}
@@ -174,7 +181,7 @@ phenopath <- function(exprs_obj, x,
 #' @return A string representation of a \code{phenopath_fit} object.
 #' 
 #' @examples 
-#' sim <- simulate_phenopath() # returns a list with gene expression in y and covariates in x
+#' sim <- simulate_phenopath() 
 #' fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
 #' print(fit)
 print.phenopath_fit <- function(x, ...) {
@@ -189,7 +196,7 @@ print.phenopath_fit <- function(x, ...) {
 #' @return A vector of latent trajectory (pseudotime) values
 #' 
 #' @examples 
-#' sim <- simulate_phenopath() # returns a list with gene expression in y and covariates in x
+#' sim <- simulate_phenopath() 
 #' fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
 #' z <- trajectory(fit)
 #' 
@@ -207,7 +214,7 @@ trajectory <- function(phenopath_fit) {
 #' @export
 #' 
 #' @examples 
-#' sim <- simulate_phenopath() # returns a list with gene expression in y and covariates in x
+#' sim <- simulate_phenopath() 
 #' fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
 #' beta <- interaction_effects(fit)
 interaction_effects <- function(phenopath_fit) {
@@ -224,7 +231,7 @@ interaction_effects <- function(phenopath_fit) {
 #' @export
 #' 
 #' @examples 
-#' sim <- simulate_phenopath() # returns a list with gene expression in y and covariates in x
+#' sim <- simulate_phenopath() 
 #' fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
 #' beta_sd <- interaction_sds(fit)
 interaction_sds <- function(phenopath_fit) {
@@ -244,9 +251,14 @@ interaction_sds <- function(phenopath_fit) {
 #' @param n The number of standard deviations away from 0 the posterior
 #' estimate of beta should be to be designated significant.
 #' 
-#' @return A logical vector describing whether each feature passes the significance test.
+#' @return A logical vector describing whether each feature 
+#' passes the significance test.
 #' 
 #' @export
+#' @examples 
+#' sim <- simulate_phenopath() 
+#' fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
+#' signints <- significant_interactions(fit)
 significant_interactions <- function(phenopath_fit, n = 2) {
   stopifnot(is(phenopath_fit, "phenopath_fit"))
   m_beta <- phenopath_fit$m_beta

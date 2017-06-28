@@ -16,7 +16,7 @@ TODO
 Get the interaction effect sizes
 }
 \examples{
-sim <- simulate_phenopath() # returns a list with gene expression in y and covariates in x
+sim <- simulate_phenopath() 
 fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
 beta <- interaction_effects(fit)
 }

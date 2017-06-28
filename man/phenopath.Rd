@@ -17,25 +17,28 @@ phenopath(exprs_obj, x, elbo_tol = 1e-05, z_init = 1, ...)
 \enumerate{
 \item The name of a column of \code{pData(exprs_obj)} if \code{exprs_obj} is an
 \code{ExpressionSet}, \emph{or}
-\item A numeric of factor vector of length equal to the number of cells, \emph{or}
+\item A numeric of factor vector of length equal to the 
+number of cells, \emph{or}
 \item A formula from which to build a model matrix from \code{pData(exprs_obj)}, 
 if \code{exprs_obj} is a \linkS4class{ExpressionSet}
 }}
 
-\item{elbo_tol}{The relative pct change in the ELBO below which is considered converged.
+\item{elbo_tol}{The relative pct change in the ELBO below 
+which is considered converged.
 See convergence section in details below.}
 
 \item{z_init}{The initialisation of the latent trajectory. Should be one of
 \enumerate{
 \item A positive integer describing which principal component of the data should
 be used for initialisation (default 1), \emph{or}
-\item A numeric vector of length number of samples to be used directly for initialisation, \emph{or}
-\item The text character \code{"random"}, for random initialisation from a standard
-normal distribution.
+\item A numeric vector of length number of samples to be used 
+directly for initialisation, \emph{or}
+\item The text character \code{"random"}, for random initialisation 
+from a standard normal distribution.
 }}
 
-\item{...}{Additional arguments to be passed to \code{\link{clvm}}. See description
-below for more details or call \code{?clvm}.}
+\item{...}{Additional arguments to be passed to \code{\link{clvm}}. 
+See description below for more details or call \code{?clvm}.}
 }
 \value{
 An S3 structure with the following entries:
@@ -47,18 +50,22 @@ An S3 structure with the following entries:
 }
 }
 \description{
-PhenoPath learns genomic trajectories in the presence of heterogenous environmental
-and genetic backgrounds. It takes input gene expression measurements that are modelled
-by a single unobserved factor (the "trajectory"). The regulation of genes along the
-trajectory is perturbed by an additional set of covariates (such as genetic or
-environmental status) allowing for the identification of covariate-trajectory interactions.
+PhenoPath learns genomic trajectories in the presence of 
+heterogenous environmental and genetic backgrounds. It takes 
+input gene expression measurements that are modelled
+by a single unobserved factor (the "trajectory"). The regulation 
+of genes along the trajectory is perturbed by an additional set of 
+covariates (such as genetic or environmental status) allowing for 
+the identification of covariate-trajectory interactions.
 The model is fitted using mean-field co-ordinate ascent variational inference.
 }
 \details{
 \strong{Input expression}
 
-If an \code{ExpressionSet} is provided, \code{exprs(...)} is used. This is assumed to be in
-a form that is suitably normalised and approximately normal, such as \eqn{\log_2(\text{TPM} +1)} or 
+If an \code{ExpressionSet} is provided, \code{exprs(...)} is used. 
+This is assumed to be in
+a form that is suitably normalised and approximately normal, such as 
+\eqn{\log_2(\text{TPM} +1)} or 
 similar.
 
 \strong{Encoding covariates}

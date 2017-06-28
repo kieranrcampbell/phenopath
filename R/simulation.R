@@ -4,6 +4,8 @@
 #' Simulate one gene from the model given paramters, z and covariates
 #' 
 #' @keywords internal
+#' @return A length-N gene expression vector simulated with the 
+#' PhenoPath mean function for the given parameters
 simulate_one_gene <- function(N, pst, x, alpha = 0, c = 0, beta = 0, tau = 1e6) {
   mu <- alpha * x + (c + beta * x) * pst
   rnorm(N, mu, 1 / sqrt(tau))
@@ -14,6 +16,9 @@ simulate_one_gene <- function(N, pst, x, alpha = 0, c = 0, beta = 0, tau = 1e6) 
 #' Sample parameters from de regime
 #' @keywords internal
 #' @name sample_fns
+#' 
+#' @return A length-3 vector of parameters corresponding to the particular 
+#' simulation regime
 sample_de <- function() {
   alpha <- sample(c(-1, 1), 1)
   c <- beta <- 0

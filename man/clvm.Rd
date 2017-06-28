@@ -26,11 +26,12 @@ re-calculating the elbo}
 
 \item{z_init}{The initialisation of the latent trajectory. Should be one of
 \enumerate{
-\item A positive integer describing which principal component of the data should
-be used for initialisation (default 1), \emph{or}
-\item A numeric vector of length number of samples to be used directly for initialisation, \emph{or}
-\item The text character \code{"random"}, for random initialisation from a standard
-normal distribution.
+\item A positive integer describing which principal component of the data 
+should be used for initialisation (default 1), \emph{or}
+\item A numeric vector of length number of samples to be used directly 
+for initialisation, \emph{or}
+\item The text character \code{"random"}, for random initialisation from 
+a standard normal distribution.
 }}
 
 \item{tau_q}{Hyperparameter tau_q}

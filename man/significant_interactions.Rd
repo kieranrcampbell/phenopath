@@ -13,11 +13,17 @@ significant_interactions(phenopath_fit, n = 2)
 estimate of beta should be to be designated significant.}
 }
 \value{
-A logical vector describing whether each feature passes the significance test.
+A logical vector describing whether each feature 
+passes the significance test.
 }
 \description{
 Given the results of \code{clvm}, decide which features show significant
 iteractions between the latent trajectory and covariates. Significant 
 features are designated as those where the variational mean of the interaction
 coefficient falls outside the \eqn{n \sigma} interval of 0.
+}
+\examples{
+sim <- simulate_phenopath() 
+fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
+signints <- significant_interactions(fit)
 }
