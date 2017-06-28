@@ -2,11 +2,13 @@
 
 PhenoPath learns genomic trajectories (pseudotimes) in the presence of heterogenous environmental and genetic backgrounds encoded as additional covariates and identifies interactions between the trajectories and covariates. Scalable variational Bayesian inference allows the trajectory and interactions to be inferred for thousands of samples and genes quickly.
 
+[![Build Status](https://travis-ci.org/kieranrcampbell/phenopath.svg?branch=master)](https://travis-ci.org/kieranrcampbell/phenopath)
+
 ### Installation
 
 ```r
 install.packages("devtools") # If not already installed
-devtools::install_github("kieranrcampbell/phenopath")
+devtools::install_github("kieranrcampbell/phenopath", build_vignettes = TRUE)
 ```
 
 ### Overview
