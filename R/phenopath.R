@@ -120,14 +120,16 @@ phenopath <- function(exprs_obj, x,
       stop("If x is a character vector it must be of compatible dimensions to exprs_obj (same number of samples)")
     }
     xx <- x
+  } else if(is(x, "formula")) {
+    xx <- x
   }
   
   # Couple of extra checks
   if(is.character(xx)) {
     warning("x is a character vector...coercing to factors...")
-    x <- factor(x)
+    xx <- factor(xx)
   }
-  if(!is.factor(xx) && !is.numeric(xx)) {
+  if(!is.factor(xx) && !is.numeric(xx) && !is(xx, "formula")) {
     stop("If x is a vector it must be of type numeric, factor, or character")
   }
 
@@ -137,7 +139,14 @@ phenopath <- function(exprs_obj, x,
   # Now we come to the case of factors
   if(is.factor(xx)) {
     x_mat <- model.matrix(~ xx, data.frame(xx))
-    x_mat <- x_mat[,-1] # Remove intercept
+    x_mat <- x_mat[,-1, drop = FALSE] # Remove intercept
+    x_mat <- apply(x_mat, 2, scale_vec) # Centre scale values
+  } else if(is(xx, "formula")) {
+    if(!is(exprs_obj, "ExpressionSet")) {
+      stop("If x is a formula, y must be an ExpressionSet")
+    }
+    x_mat <- model.matrix(xx, pData(exprs_obj))
+    x_mat <- x_mat[,-1, drop = FALSE] # Remove intercept
     x_mat <- apply(x_mat, 2, scale_vec) # Centre scale values
   } else {
     x_mat <- matrix(xx)

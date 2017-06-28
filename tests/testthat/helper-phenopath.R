@@ -1,8 +1,8 @@
 N <- 100
-G <- 100
+G <- 80
 G_de <- 10
 G_pst <- 20
-G_pst_beta <- 50
+G_pst_beta <- 30
 G_de_pst_beta <- 20
 thin <- 5
 

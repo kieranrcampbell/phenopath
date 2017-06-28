@@ -17,7 +17,7 @@ test_that("simulate_phenopath() returns valid object", {
 
 test_that("simulate_phenopath() returns correct parameter specs", {
   param_df <- sim$parameters
-  expect_equal(nrow(param_df), N)
+  expect_equal(nrow(param_df), G)
   expect_identical(names(param_df), c("alpha", "lambda", "beta", "regime"))  
   
   regime_table <- table(param_df$regime)
@@ -53,6 +53,24 @@ test_that("CAVI for CLVM has correctly sized outputs", {
 
 
 test_that("phenopath() accepts ExpressionSets", {
+  exprs_mat <- t(sim$y)
+  pdata <- new("AnnotatedDataFrame", data.frame(x = sim$x))
+  sce <- Biobase::ExpressionSet(exprs_mat, pdata)
   
+  ## We'll test phenopath with three different x inputs:
+  ## (1) Character vector from pData(sce)
+  ## (2) Formula
+  ## (3) The values themselves
+  ## and check we get the same result for all
+  
+  set.seed(123)
+  suppressWarnings(fit1 <- phenopath(sce, "x", maxiter = 4, verbose = FALSE))
+  set.seed(123)
+  suppressWarnings(fit2 <- phenopath(sce, ~ x, maxiter = 4, verbose = FALSE))
+  set.seed(123)
+  suppressWarnings(fit3 <- phenopath(sce, pData(sce)$x, maxiter = 4, verbose = FALSE))
+  
+  elbos <- sapply(list(fit1$elbos, fit2$elbos, fit3$elbos), tail, n = 1)
+  expect_equal(length(unique(elbos)), 1)
 })
 
