@@ -55,7 +55,7 @@
 #' If an \code{ExpressionSet} is provided, \code{exprs(...)} is used. 
 #' This is assumed to be in
 #' a form that is suitably normalised and approximately normal, such as 
-#' \eqn{\log_2(\text{TPM} +1)} or 
+#' the log of TPM values (plus a suitable offset) or 
 #' similar.
 #'
 #' \strong{Encoding covariates}
