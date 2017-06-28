@@ -12,14 +12,16 @@
 #' 
 #' @param exprs_obj Input gene expression, either
 #' \enumerate{
-#' \item An \linkS4class{ExpressionSet} object such as an \linkS4class{SCESet}, \emph{or}
+#' \item An \linkS4class{ExpressionSet} object, \emph{or}
 #' \item A cell-by-gene matrix of normalised expression values in log form.
 #' }
 #' @param x The covariate vector, either
 #' \enumerate{
 #' \item The name of a column of \code{pData(exprs_obj)} if \code{exprs_obj} is an
 #' \code{ExpressionSet}, \emph{or}
-#' \item A numeric of factor vector of length equal to the number of cells
+#' \item A numeric of factor vector of length equal to the number of cells, \emph{or}
+#' \item A formula from which to build a model matrix from \code{pData(exprs_obj)}, 
+#' if \code{exprs_obj} is a \linkS4class{ExpressionSet}
 #' }
 #' @param elbo_tol The relative pct change in the ELBO below which is considered converged.
 #' See convergence section in details below.
@@ -145,7 +147,7 @@ phenopath <- function(exprs_obj, x,
     if(!is(exprs_obj, "ExpressionSet")) {
       stop("If x is a formula, y must be an ExpressionSet")
     }
-    x_mat <- model.matrix(xx, pData(exprs_obj))
+    x_mat <- model.matrix(xx, Biobase::pData(exprs_obj))
     x_mat <- x_mat[,-1, drop = FALSE] # Remove intercept
     x_mat <- apply(x_mat, 2, scale_vec) # Centre scale values
   } else {
@@ -238,7 +240,9 @@ interaction_sds <- function(phenopath_fit) {
 #' features are designated as those where the variational mean of the interaction
 #' coefficient falls outside the \eqn{n \sigma} interval of 0.
 #' 
-#' @param pcavi The results of a call to \code{clvm}
+#' @param phenopath_fit The results of a call to \code{clvm}
+#' @param n The number of standard deviations away from 0 the posterior
+#' estimate of beta should be to be designated significant.
 #' 
 #' @return A logical vector describing whether each feature passes the significance test.
 #' 
@@ -254,3 +258,4 @@ significant_interactions <- function(phenopath_fit, n = 2) {
   if(ncol(sig) == 1) sig <- as.vector(sig)
   return(sig)
 }
+

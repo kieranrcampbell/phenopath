@@ -46,7 +46,7 @@ library(Rcpp)
 #' 
 #' @examples 
 #' sim <- simulate_phenopath()
-#' fit <- clvm(sim$y, sim$x)
+#' fit <- clvm(sim$y, matrix(sim$x))
 #' 
 #' 
 #' @export

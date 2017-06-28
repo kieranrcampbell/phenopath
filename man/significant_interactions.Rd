@@ -7,7 +7,10 @@
 significant_interactions(phenopath_fit, n = 2)
 }
 \arguments{
-\item{pcavi}{The results of a call to \code{clvm}}
+\item{phenopath_fit}{The results of a call to \code{clvm}}
+
+\item{n}{The number of standard deviations away from 0 the posterior
+estimate of beta should be to be designated significant.}
 }
 \value{
 A logical vector describing whether each feature passes the significance test.

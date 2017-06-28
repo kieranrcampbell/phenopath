@@ -21,7 +21,8 @@ Suggests:
     rmarkdown,
     tidyr,
     forcats,
-    testthat
+    testthat,
+    scater
 biocViews: RNASeq, GeneExpression, Bayesian, SingleCell, PrincipalComponent
 LinkingTo: Rcpp, BH
 RoxygenNote: 6.0.1

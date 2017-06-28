@@ -9,7 +9,7 @@ phenopath(exprs_obj, x, elbo_tol = 1e-05, z_init = 1, ...)
 \arguments{
 \item{exprs_obj}{Input gene expression, either
 \enumerate{
-\item An \linkS4class{ExpressionSet} object such as an \linkS4class{SCESet}, \emph{or}
+\item An \linkS4class{ExpressionSet} object, \emph{or}
 \item A cell-by-gene matrix of normalised expression values in log form.
 }}
 
@@ -17,7 +17,9 @@ phenopath(exprs_obj, x, elbo_tol = 1e-05, z_init = 1, ...)
 \enumerate{
 \item The name of a column of \code{pData(exprs_obj)} if \code{exprs_obj} is an
 \code{ExpressionSet}, \emph{or}
-\item A numeric of factor vector of length equal to the number of cells
+\item A numeric of factor vector of length equal to the number of cells, \emph{or}
+\item A formula from which to build a model matrix from \code{pData(exprs_obj)}, 
+if \code{exprs_obj} is a \linkS4class{ExpressionSet}
 }}
 
 \item{elbo_tol}{The relative pct change in the ELBO below which is considered converged.

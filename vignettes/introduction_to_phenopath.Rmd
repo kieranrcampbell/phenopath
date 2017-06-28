@@ -107,10 +107,10 @@ plot_elbo(fit)
 ## Examining results
 
 
-The posterior mean estimates of the pseudotimes $z$ sit in `fit$m_z`. We can visualise these compared to both the true pseudotimes and the first principal component of the data:
+The posterior mean estimates of the pseudotimes $z$ sit in `fit$m_z` that can be extracted using the `trajectory` function. We can visualise these compared to both the true pseudotimes and the first principal component of the data:
 
 ```{r plot-results, fig.show = 'hold', fig.width = 2.5, fig.height = 2.5}
-qplot(sim$z, fit$m_z) +
+qplot(sim$z, trajectory(fit)) +
   xlab("True z") + ylab("Phenopath z")
 qplot(sim$z, pca_df$PC1) +
   xlab("True z") + ylab("PC1")
@@ -119,7 +119,7 @@ qplot(sim$z, pca_df$PC1) +
 We see that this has high correlation with the true pseudotimes:
 
 ```{r print-correlation}
-cor(sim$z, fit$m_z)
+cor(sim$z, trajectory(fit))
 ```
 
 Next, we're interested in the interactions between the latent space and the covariates. There are three functions to help us here:
