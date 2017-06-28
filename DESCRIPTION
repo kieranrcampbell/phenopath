@@ -20,7 +20,8 @@ Suggests:
     knitr,
     rmarkdown,
     tidyr,
-    forcats
+    forcats,
+    testthat
 biocViews: RNASeq, GeneExpression, Bayesian, SingleCell, PrincipalComponent
 LinkingTo: Rcpp, BH
 RoxygenNote: 6.0.1
