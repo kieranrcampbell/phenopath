@@ -17,7 +17,7 @@ suppressPackageStartupMessages(library(dplyr))
 suppressPackageStartupMessages(library(ggplot2))
 suppressPackageStartupMessages(library(tidyr))
 suppressPackageStartupMessages(library(forcats))
-devtools::load_all("~/oxford/phenopath/") # library(phenopath)
+library(phenopath)
 ```
 
 # Overview of PhenoPath
@@ -89,7 +89,9 @@ ggplot(pca_df, aes(x = PC1, y = PC2, color = z)) +
 
 ## Fit PhenoPath model
 
-PhenoPath fits models with a call to the `phenopath` function, which requires at least an expression matrix `y` and a covariate vector `x`. For use with `ExpressionSets` see the [section on input formats](#inputdata). For this example we choose an ELBO tolerance of `1e-6` and ELBO calculations thinned by `40`. A discussion of how to control variational inference can be found [below](#varcontrol).
+PhenoPath fits models with a call to the `phenopath` function, which requires at least an expression matrix `y` and a covariate vector `x`. The expression data should represent something comparable to logged counts, such as $log_2(\text{TPM}+1)$. Note that buy default PhenoPath centre-scales the input expression.
+
+For use with `ExpressionSets` see the [section on input formats](#inputdata). For this example we choose an ELBO tolerance of `1e-6` and ELBO calculations thinned by `40`. A discussion of how to control variational inference can be found [below](#varcontrol).
 
 ```{r see-results, cache=TRUE}
 fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-6, thin = 40)
@@ -169,15 +171,76 @@ ggplot(df_large, aes(x = z, y = y, color = x)) +
 
 # Advanced
 
-## Input data format {#inputdata}
+## Using an `ExpressionSet` as input
 
-### Input matrices
+Alternatively you might have expression values in an `ExpressionSet`. For single-cell data it is highly recommended to use the [scater](https://bioconductor.org/packages/release/bioc/html/scater.html) 
+package (@mccarthy2017scater) in which case data is stored in a class derived from `ExpressionSets` called `SCESet`s. 
 
-### `ExpressionSet`s
+We'll first construct an example `SCESet` using our previous simulation data:
+
+```{r construct-sceset, warning = FALSE}
+suppressPackageStartupMessages(library(scater))
+exprs_mat <- t(sim$y)
+pdata <- Biobase::AnnotatedDataFrame(data.frame(x = sim$x))
+sce <- newSCESet(exprs_mat, phenoData = pdata)
+sce
+```
+
+Note that PhenoPath will use whatever is in the `exprs` slot of an `ExpressionSet` as gene expression values. 
+
+We can then pass the $x$ covariates to PhenoPath in three ways:
+
+1. As a vector or matrix as before
+2. As a character that names a column of `pData(sce)` to use
+3. A formula to build a model matrix from `pData(sce)`
+
+For our example, these three look like
+
+```{r example-using-expressionset, eval = FALSE}
+fit <- phenopath(sce, sim$x) # 1
+fit <- phenopath(sce, "x") # 2
+fit <- phenopath(sce, ~ x) # 3
+```
+
+Note that if the column of the SCESet is a factor it is coerced into a one-hot encoding. The intercept term is then removed as this is taken care of by the $\lambda$ coefficient automatically, and the columns centre-scaled.
 
 ## Initialisation of latent space
 
+The posterior distribution is naturally multi-modal and the use of variational inference means we essentially dive straight into the nearest local maximum. Therefore, correct initialisation of the latent space is important. This is controlled through the `z_init` argument.
+
+PhenoPath allows for three different initialisations:
+
+1. An integer specifying a principal component of the data to initialise to
+2. A vector specifying the initial values
+3. Random initialisation from standard normal distribution
+
+For our example these three look like
+
+```{r initialisation-examples, eval = FALSE}
+fit <- phenopath(sim$y, sim$x, z_init = 1) # 1, initialise to first principal component
+fit <- phenopath(sim$y, sim$x, z_init = sim$z) # 2, initialise to true values
+fit <- phenopath(sim$y, sim$x, z_init = "random") # 3, random initialisation
+```
+
 ## Controlling variational inference {#varcontrol}
+
+There are several parameters that tune the coordinate ascent variational inference (CAVI):
+
+1. `maxiter` maximum number of iterations to run CAVI for
+2. `elbo_tol` the _percentage_ change in the ELBO below which the 
+model is considered converged
+3. `thin` Computing the ELBO is expensive, so only compute the ELBO every
+`thin` iterations
+
+For example:
+
+```{r cavi-tuning, eval = FALSE}
+fit <- phenopath(sim$y, sim$x,
+                 maxiter = 1000, # 1000 iterations max
+                 elbo_tol = 1e-2, # consider model converged when change in ELBO < 0.02%
+                 thin = 20 # calculate ELBO every 20 iterations
+                 )
+```
 
 # Technical
 
