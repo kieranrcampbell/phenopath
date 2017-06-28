@@ -6,8 +6,8 @@ Date: 2017-7-28
 Author: Kieran Campbell
 Maintainer: Kieran Campbell <kieranrcampbell@gmail.com>
 Description: PhenoPath infers genomic trajectories (pseudotimes) in the presence of
-heterogeneous genetic and environmental backgrounds and tests for interactions 
-between them.
+  heterogeneous genetic and environmental backgrounds and tests for interactions 
+  between them.
 License: GPL (>= 2)
 Imports:
   Rcpp (>= 0.12.8), 
