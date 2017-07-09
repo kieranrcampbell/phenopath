@@ -1,7 +1,7 @@
 Package: phenopath
 Type: Package
 Title: Genomic trajectories with heterogeneous genetic and environmental backgrounds
-Version: 0.99.3
+Version: 0.99.4
 Date: 2017-7-28
 Author: Kieran Campbell
 Maintainer: Kieran Campbell <kieranrcampbell@gmail.com>
@@ -26,6 +26,6 @@ Suggests:
     scater,
     BiocStyle
 biocViews: RNASeq, GeneExpression, Bayesian, SingleCell, PrincipalComponent
-LinkingTo: Rcpp, BH
+LinkingTo: Rcpp
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr
