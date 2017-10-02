@@ -124,13 +124,16 @@ phenopath <- function(exprs_obj, x,
       stop("If x is a character then exprs_obj must be an ExpressionSet (where x represents a column in pData(exprs_obj))")
     }
     xx <- Biobase::pData(exprs_obj)[[x]]
-  } else if(is.vector(x)) {
+  } else if(is.vector(x) | is.factor(x)) {
     if(length(x) != N) {
-      stop("If x is a character vector it must be of compatible dimensions to exprs_obj (same number of samples)")
+      stop("If x is a character vector or factor it must be of compatible dimensions to exprs_obj (same number of samples)")
     }
     xx <- x
   } else if(is(x, "formula")) {
     xx <- x
+  } else if(is.matrix(x)) {
+    stopifnot(nrow(x) == N)
+    x_mat <- xx <- x
   }
   
   # Couple of extra checks
@@ -143,13 +146,15 @@ phenopath <- function(exprs_obj, x,
   }
 
   # If single vector then scale
-  if(is.numeric(xx)) xx <- scale_vec(xx)
+  if(is.numeric(xx) && !is.matrix(xx)) xx <- scale_vec(xx)
   
   # Now we come to the case of factors
   if(is.factor(xx)) {
     x_mat <- model.matrix(~ xx, data.frame(xx))
+    # COME BACK AND CHANGE ME
     x_mat <- x_mat[,-1, drop = FALSE] # Remove intercept
     x_mat <- apply(x_mat, 2, scale_vec) # Centre scale values
+    # x_mat <- apply(x_mat, 2, function(x) return(2*x - 1))
   } else if(is(xx, "formula")) {
     if(!is(exprs_obj, "ExpressionSet")) {
       stop("If x is a formula, y must be an ExpressionSet")
@@ -157,7 +162,7 @@ phenopath <- function(exprs_obj, x,
     x_mat <- model.matrix(xx, Biobase::pData(exprs_obj))
     x_mat <- x_mat[,-1, drop = FALSE] # Remove intercept
     x_mat <- apply(x_mat, 2, scale_vec) # Centre scale values
-  } else {
+  } else if(is.vector(xx)) {
     x_mat <- matrix(xx)
   }
   
