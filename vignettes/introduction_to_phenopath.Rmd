@@ -139,7 +139,7 @@ Alternatively, one can call the `interactions` function that returns a data fram
 * `interaction_effect_size` The effect size of the interaction ($\beta$ from the statistical model)
 * `significant` Boolean for whether the interaction effect is significantly different from 0
 * `chi` The precision of the ARD prior on $\beta$
-* `pathway_score` The pathway score $\lambda$, showing the overall effect for each gene marginalised over the covariate
+* `pathway_loading` The pathway loading $\lambda$, showing the overall effect for each gene marginalised over the covariate
 
 In our simulated data above, the first 20 genes were simulated with no interaction effect while the latter 20 were simulated with interaction effects. We can pull out the interaction effect sizes, standard deviations, and significance test results into a data frame and plot:
 
