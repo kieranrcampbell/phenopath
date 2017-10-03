@@ -23,7 +23,7 @@ from the statistical model)
 \item \code{significant} Boolean for whether the interaction effect is significantly
 different from 0
 \item \code{chi} The precision of the ARD prior on \eqn{beta}
-\item \code{pathway_score} The pathway score \eqn{lambda}, showing the overall
+\item \code{pathway_loading} The pathway loading \eqn{lambda}, showing the overall
 effect for each gene marginalised over the covariate
 }
 }

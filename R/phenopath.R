@@ -303,7 +303,7 @@ significant_interactions <- function(phenopath_fit, n = 3) {
 #' \item \code{significant} Boolean for whether the interaction effect is significantly
 #' different from 0
 #' \item \code{chi} The precision of the ARD prior on \eqn{beta}
-#' \item \code{pathway_score} The pathway score \eqn{lambda}, showing the overall
+#' \item \code{pathway_loading} The pathway loading \eqn{lambda}, showing the overall
 #' effect for each gene marginalised over the covariate
 #' }
 #' @examples 
@@ -336,7 +336,7 @@ interactions <- function(phenopath_fit, n = 3) {
   interaction_df <- dplyr::inner_join(ie_tidy, sig_tidy, by = c("feature", "covariate"))
   interaction_df <- dplyr::inner_join(interaction_df, chi_tidy, by = c("feature", "covariate"))
   
-  lambda_df <- dplyr::data_frame(pathway_score = phenopath_fit$m_lambda,
+  lambda_df <- dplyr::data_frame(pathway_loading = phenopath_fit$m_lambda,
                           feature = phenopath_fit$feature_names)
   
   interaction_df <- dplyr::inner_join(interaction_df, lambda_df, by = "feature")
