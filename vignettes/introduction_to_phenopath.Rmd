@@ -132,6 +132,15 @@ Next, we're interested in the interactions between the latent space and the cova
 
 Note that if $P=1$ (ie there is only one covariate) each of these will return a vector, while if $P>1$ then a matrix is returned. 
 
+Alternatively, one can call the `interactions` function that returns a data frame with the following entries:
+
+* `feature` The feature (usually gene)
+* `covariate` The covariate, specified from the order originally supplied to the call to `phenopath`
+* `interaction_effect_size` The effect size of the interaction ($\beta$ from the statistical model)
+* `significant` Boolean for whether the interaction effect is significantly different from 0
+* `chi` The precision of the ARD prior on $\beta$
+* `pathway_score` The pathway score $\lambda$, showing the overall effect for each gene marginalised over the covariate
+
 In our simulated data above, the first 20 genes were simulated with no interaction effect while the latter 20 were simulated with interaction effects. We can pull out the interaction effect sizes, standard deviations, and significance test results into a data frame and plot:
 
 ```{r beta-df, fig.width = 6, fig.height = 3}

@@ -16,11 +16,11 @@ Imports:
   Biobase,
   dplyr,
   tibble,
-  ggplot2
+  ggplot2,
+  tidyr
 Suggests:
     knitr,
     rmarkdown,
-    tidyr,
     forcats,
     testthat,
     scater,

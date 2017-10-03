@@ -4,7 +4,7 @@
 \alias{significant_interactions}
 \title{Significance testing for interaction features}
 \usage{
-significant_interactions(phenopath_fit, n = 2)
+significant_interactions(phenopath_fit, n = 3)
 }
 \arguments{
 \item{phenopath_fit}{The results of a call to \code{clvm}}

@@ -171,6 +171,10 @@ phenopath <- function(exprs_obj, x,
   cl_fit$N <- nrow(y)
   cl_fit$G <- ncol(y)
   
+  feature_names <- colnames(y)
+  if(is.null(feature_names)) feature_names <- paste0("feature_", seq_len(cl_fit$G))
+  cl_fit$feature_names <- feature_names
+  
   return(
     structure(cl_fit, class = "phenopath_fit")
   )
@@ -264,7 +268,7 @@ interaction_sds <- function(phenopath_fit) {
 #' sim <- simulate_phenopath() 
 #' fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
 #' signints <- significant_interactions(fit)
-significant_interactions <- function(phenopath_fit, n = 2) {
+significant_interactions <- function(phenopath_fit, n = 3) {
   stopifnot(is(phenopath_fit, "phenopath_fit"))
   m_beta <- phenopath_fit$m_beta
   pos_sd <- sqrt(phenopath_fit$s_beta)
@@ -275,4 +279,70 @@ significant_interactions <- function(phenopath_fit, n = 2) {
   if(ncol(sig) == 1) sig <- as.vector(sig)
   return(sig)
 }
+
+
+#' Tidy summary of interactions
+#' 
+#' Computes a tidy data frame of the interaction effects, pathway scores, and significance for
+#' each gene and covariate interaction.
+#' 
+#' @param phenopath_fit An object returned by a call to \code{phenopath}
+#' @param n The number of standard deviations away from 0 the posterior of the 
+#' interaction effect sizes should be to be designated as significant
+#' 
+#' @importFrom tidyr gather
+#' @export
+#' 
+#' @return A data frame with the following columns:
+#' \itemize{
+#' \item \code{feature} The feature (usually gene)
+#' \item \code{covariate} The covariate, specified from the order originally supplied to 
+#' the call to \code{phenopath}
+#' \item \code{interaction_effect_size} The effect size of the interaction (\eqn{beta} 
+#' from the statistical model)
+#' \item \code{significant} Boolean for whether the interaction effect is significantly
+#' different from 0
+#' \item \code{chi} The precision of the ARD prior on \eqn{beta}
+#' \item \code{pathway_score} The pathway score \eqn{lambda}, showing the overall
+#' effect for each gene marginalised over the covariate
+#' }
+#' @examples 
+#' sim <- simulate_phenopath() 
+#' fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-2)
+#' interactions(fit)
+interactions <- function(phenopath_fit, n = 3) {
+  covariate <- interaction_effect_size <- feature <- significant_interaction <- NULL
+  
+  ie <- interaction_effects(phenopath_fit)
+  sig <- significant_interactions(phenopath_fit)
+  if(is.vector(ie)) {
+    ie <- matrix(ie)
+  }
+  if(is.vector(sig)) {
+    sig <- matrix(sig)
+  }
+  
+  chi <- dplyr::as_data_frame(t(phenopath_fit$chi_exp))
+  
+  ie <- dplyr::as_data_frame(ie)
+  sig <- dplyr::as_data_frame(sig)
+  names(ie) <- names(sig) <- names(chi) <- paste0("covariate_", 1:ncol(ie))
+  ie$feature <- sig$feature <- chi$feature <- phenopath_fit$feature_names
+  
+  ie_tidy <- gather(ie, covariate, interaction_effect_size, -feature)  
+  sig_tidy <- gather(sig, covariate, significant_interaction, -feature)  
+  chi_tidy <- gather(chi, covariate, chi, -feature)
+  
+  interaction_df <- dplyr::inner_join(ie_tidy, sig_tidy, by = c("feature", "covariate"))
+  interaction_df <- dplyr::inner_join(interaction_df, chi_tidy, by = c("feature", "covariate"))
+  
+  lambda_df <- dplyr::data_frame(pathway_score = phenopath_fit$m_lambda,
+                          feature = phenopath_fit$feature_names)
+  
+  interaction_df <- dplyr::inner_join(interaction_df, lambda_df, by = "feature")
+  interaction_df
+}
+
+
+
 
