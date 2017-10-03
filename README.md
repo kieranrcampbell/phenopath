@@ -4,6 +4,10 @@ PhenoPath learns genomic trajectories (pseudotimes) in the presence of heterogen
 
 [![Build Status](https://travis-ci.org/kieranrcampbell/phenopath.svg?branch=master)](https://travis-ci.org/kieranrcampbell/phenopath)
 
+To quickly get started, see either of the vignettes:
+
+* [Introduction to PhenoPath](https://kieranrcampbell.github.io/phenopath/introduction_to_phenopath.html)
+* [End-to-end example on Shalek et al. (2014) from raw data to stimulant-pseudotime interactions](https://kieranrcampbell.github.io/phenopath/phenopath_shalek_vignette.html)
 
 ### Installation
 
