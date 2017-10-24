@@ -52,10 +52,11 @@ test_that("CAVI for CLVM has correctly sized outputs", {
 })
 
 
-test_that("phenopath() accepts ExpressionSets", {
+test_that("phenopath() accepts SingleCellExperiments", {
   exprs_mat <- t(sim$y)
-  pdata <- Biobase::AnnotatedDataFrame(data.frame(x = sim$x))
-  sce <- Biobase::ExpressionSet(exprs_mat, pdata)
+  pdata <- data.frame(x = sim$x)
+  sce <- SingleCellExperiment(assays = list(exprs = exprs_mat), 
+                              colData = pdata)
   
   ## We'll test phenopath with three different x inputs:
   ## (1) Character vector from pData(sce)
@@ -68,7 +69,7 @@ test_that("phenopath() accepts ExpressionSets", {
   set.seed(123)
   suppressWarnings(fit2 <- phenopath(sce, ~ x, maxiter = 4, verbose = FALSE))
   set.seed(123)
-  suppressWarnings(fit3 <- phenopath(sce, Biobase::pData(sce)$x, maxiter = 4, verbose = FALSE))
+  suppressWarnings(fit3 <- phenopath(sce, colData(sce)$x, maxiter = 4, verbose = FALSE))
   
   elbos <- sapply(list(fit1$elbos, fit2$elbos, fit3$elbos), tail, n = 1)
   expect_equal(length(unique(elbos)), 1)

@@ -91,7 +91,7 @@ ggplot(pca_df, aes(x = PC1, y = PC2, color = z)) +
 
 PhenoPath fits models with a call to the `phenopath` function, which requires at least an expression matrix `y` and a covariate vector `x`. The expression data should represent something comparable to logged counts, such as $log_2(\text{TPM}+1)$. Note that buy default PhenoPath centre-scales the input expression.
 
-For use with `ExpressionSets` see the [section on input formats](#inputdata). For this example we choose an ELBO tolerance of `1e-6` and ELBO calculations thinned by `40`. A discussion of how to control variational inference can be found [below](#varcontrol).
+For use with `SingleCellExperiment`s see the [section on input formats](#inputdata). For this example we choose an ELBO tolerance of `1e-6` and ELBO calculations thinned by `40`. A discussion of how to control variational inference can be found [below](#varcontrol).
 
 ```{r see-results, cache=TRUE}
 fit <- phenopath(sim$y, sim$x, elbo_tol = 1e-6, thin = 40)
@@ -180,28 +180,28 @@ ggplot(df_large, aes(x = z, y = y, color = x)) +
 
 # Advanced
 
-## Using an `ExpressionSet` as input
+## Using an `SingleCellExperiment` as input
 
-Alternatively you might have expression values in an `ExpressionSet`. For single-cell data it is highly recommended to use the [scater](https://bioconductor.org/packages/release/bioc/html/scater.html) 
-package (@mccarthy2017scater) in which case data is stored in a class derived from `ExpressionSets` called `SCESet`s. 
+Alternatively you might have expression values in an `SingleCellExperiment`. For single-cell data it is highly recommended to use the [scater](https://bioconductor.org/packages/release/bioc/html/singlecellexperiment.html)  in which case data is stored in a class derived from `SummarizedExperiment`.
 
-We'll first construct an example `SCESet` using our previous simulation data:
+We'll first construct an example `SingleCellExperiment` using our previous simulation data:
 
 ```{r construct-sceset, warning = FALSE}
-suppressPackageStartupMessages(library(scater))
+suppressPackageStartupMessages(library(SingleCellExperiment))
 exprs_mat <- t(sim$y)
-pdata <- Biobase::AnnotatedDataFrame(data.frame(x = sim$x))
-sce <- newSCESet(exprs_mat, phenoData = pdata)
+pdata <- data.frame(x = sim$x)
+sce <- SingleCellExperiment(assays = list(exprs = exprs_mat), 
+                            colData = pdata)
 sce
 ```
 
-Note that PhenoPath will use whatever is in the `exprs` slot of an `ExpressionSet` as gene expression values. 
+Note that PhenoPath will use by default is in the `exprs` assay of a `SingleCellExperiment` (ie `assay(sce, "exprs")`) as gene expression values, which can be changed using the `sce_assay` string in the column to `phenopath`. 
 
 We can then pass the $x$ covariates to PhenoPath in three ways:
 
 1. As a vector or matrix as before
-2. As a character that names a column of `pData(sce)` to use
-3. A formula to build a model matrix from `pData(sce)`
+2. As a character that names a column of `colData(sce)` to use
+3. A formula to build a model matrix from `colData(sce)`
 
 For our example, these three look like
 

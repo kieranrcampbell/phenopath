@@ -14,18 +14,20 @@
 #' 
 #' @param exprs_obj Input gene expression, either
 #' \enumerate{
-#' \item An \linkS4class{ExpressionSet} object, \emph{or}
+#' \item An \linkS4class{SingleCellExperiment} object, \emph{or}
 #' \item A cell-by-gene matrix of normalised expression values in log form.
 #' }
 #' @param x The covariate vector, either
 #' \enumerate{
-#' \item The name of a column of \code{pData(exprs_obj)} if \code{exprs_obj} is an
-#' \code{ExpressionSet}, \emph{or}
+#' \item The name of a column of \code{colData(exprs_obj)} if \code{exprs_obj} is an
+#' \code{SingleCellExperiment}, \emph{or}
 #' \item A numeric of factor vector of length equal to the 
 #' number of cells, \emph{or}
-#' \item A formula from which to build a model matrix from \code{pData(exprs_obj)}, 
-#' if \code{exprs_obj} is a \linkS4class{ExpressionSet}
+#' \item A formula from which to build a model matrix from \code{colData(exprs_obj)}, 
+#' if \code{exprs_obj} is a \linkS4class{SingleCellExperiment}
 #' }
+#' @param sce_assay The assay from \code{exprs_obj} to use as expression if
+#' \code{exprs_object} is a \code{SingleCellExperiment}
 #' @param elbo_tol The relative pct change in the ELBO below 
 #' which is considered converged.
 #' See convergence section in details below.
@@ -52,7 +54,8 @@
 #' @details
 #' \strong{Input expression}
 #' 
-#' If an \code{ExpressionSet} is provided, \code{exprs(...)} is used. 
+#' If an \code{SingleCellExperiment} is provided, \code{assay(exprs_obj, sce_assay)} 
+#' is used. 
 #' This is assumed to be in
 #' a form that is suitably normalised and approximately normal, such as 
 #' the log of TPM values (plus a suitable offset) or 
@@ -60,7 +63,7 @@
 #'
 #' \strong{Encoding covariates}
 #' 
-#' If \code{x} is the name of...
+#' See the vignette.
 #' 
 #' \strong{Convergence of variational inference}
 #' 
@@ -94,8 +97,9 @@
 #' 
 #' @importFrom methods is
 #' @importFrom stats model.matrix
+#' @importFrom SummarizedExperiment assay colData
 #' @export
-phenopath <- function(exprs_obj, x, 
+phenopath <- function(exprs_obj, x, sce_assay = "exprs",
                       elbo_tol = 1e-5, z_init = 1, ...) {
   
   is_eset <- is_matrix <- FALSE
@@ -104,10 +108,10 @@ phenopath <- function(exprs_obj, x,
   xx <- NULL # Covariate matrix we'll actually use
   
   # Get expression input
-  if(is(exprs_obj, "ExpressionSet")) {
+  if(is(exprs_obj, "SingleCellExperiment")) {
     is_eset <- TRUE
     N <- ncol(exprs_obj)
-    y <- t(Biobase::exprs(exprs_obj))
+    y <- t(assay(exprs_obj, sce_assay))
     
   } else if(is.matrix(exprs_obj) && is.numeric(exprs_obj)) {
     is_matrix <- TRUE
@@ -120,10 +124,10 @@ phenopath <- function(exprs_obj, x,
   # Sort covariate input
   if(length(x) == 1 && is.character(x)) {
     # x describes a column of pData(exprs_obj)
-    if(!is_eset || (!x %in% Biobase::varLabels(exprs_obj))) {
-      stop("If x is a character then exprs_obj must be an ExpressionSet (where x represents a column in pData(exprs_obj))")
+    if(!is_eset || (!x %in% names(colData(exprs_obj)))) {
+      stop("If x is a character then exprs_obj must be an ExpressionSet (where x represents a column in colData(exprs_obj))")
     }
-    xx <- Biobase::pData(exprs_obj)[[x]]
+    xx <- colData(exprs_obj)[[x]]
   } else if(is.vector(x) | is.factor(x)) {
     if(length(x) != N) {
       stop("If x is a character vector or factor it must be of compatible dimensions to exprs_obj (same number of samples)")
@@ -154,12 +158,11 @@ phenopath <- function(exprs_obj, x,
     # COME BACK AND CHANGE ME
     x_mat <- x_mat[,-1, drop = FALSE] # Remove intercept
     x_mat <- apply(x_mat, 2, scale_vec) # Centre scale values
-    # x_mat <- apply(x_mat, 2, function(x) return(2*x - 1))
   } else if(is(xx, "formula")) {
-    if(!is(exprs_obj, "ExpressionSet")) {
-      stop("If x is a formula, y must be an ExpressionSet")
+    if(!is(exprs_obj, "SingleCellExperiment")) {
+      stop("If x is a formula, y must be an SingleCellExperiment")
     }
-    x_mat <- model.matrix(xx, Biobase::pData(exprs_obj))
+    x_mat <- model.matrix(xx, colData(exprs_obj))
     x_mat <- x_mat[,-1, drop = FALSE] # Remove intercept
     x_mat <- apply(x_mat, 2, scale_vec) # Centre scale values
   } else if(is.vector(xx)) {

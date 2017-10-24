@@ -1,19 +1,21 @@
 Package: phenopath
 Type: Package
 Title: Genomic trajectories with heterogeneous genetic and environmental backgrounds
-Version: 0.99.4
-Date: 2017-7-28
+Version: 1.1.1
+Date: 2017-10-24
 Author: Kieran Campbell
 Maintainer: Kieran Campbell <kieranrcampbell@gmail.com>
 Description: PhenoPath infers genomic trajectories (pseudotimes) in the presence of
   heterogeneous genetic and environmental backgrounds and tests for interactions 
   between them.
 License: Apache License (== 2.0)
+Depends:
+  SingleCellExperiment
 Imports:
   Rcpp (>= 0.12.8), 
+  SummarizedExperiment,
   methods,
   stats,
-  Biobase,
   dplyr,
   tibble,
   ggplot2,

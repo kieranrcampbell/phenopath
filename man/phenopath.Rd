@@ -4,24 +4,28 @@
 \alias{phenopath}
 \title{PhenoPath - genomic trajectories with heterogeneous backgrounds}
 \usage{
-phenopath(exprs_obj, x, elbo_tol = 1e-05, z_init = 1, ...)
+phenopath(exprs_obj, x, sce_assay = "exprs", elbo_tol = 1e-05, z_init = 1,
+  ...)
 }
 \arguments{
 \item{exprs_obj}{Input gene expression, either
 \enumerate{
-\item An \linkS4class{ExpressionSet} object, \emph{or}
+\item An \linkS4class{SingleCellExperiment} object, \emph{or}
 \item A cell-by-gene matrix of normalised expression values in log form.
 }}
 
 \item{x}{The covariate vector, either
 \enumerate{
-\item The name of a column of \code{pData(exprs_obj)} if \code{exprs_obj} is an
-\code{ExpressionSet}, \emph{or}
+\item The name of a column of \code{colData(exprs_obj)} if \code{exprs_obj} is an
+\code{SingleCellExperiment}, \emph{or}
 \item A numeric of factor vector of length equal to the 
 number of cells, \emph{or}
-\item A formula from which to build a model matrix from \code{pData(exprs_obj)}, 
-if \code{exprs_obj} is a \linkS4class{ExpressionSet}
+\item A formula from which to build a model matrix from \code{colData(exprs_obj)}, 
+if \code{exprs_obj} is a \linkS4class{SingleCellExperiment}
 }}
+
+\item{sce_assay}{The assay from \code{exprs_obj} to use as expression if
+\code{exprs_object} is a \code{SingleCellExperiment}}
 
 \item{elbo_tol}{The relative pct change in the ELBO below 
 which is considered converged.
@@ -62,7 +66,8 @@ The model is fitted using mean-field co-ordinate ascent variational inference.
 \details{
 \strong{Input expression}
 
-If an \code{ExpressionSet} is provided, \code{exprs(...)} is used. 
+If an \code{SingleCellExperiment} is provided, \code{assay(exprs_obj, sce_assay)} 
+is used. 
 This is assumed to be in
 a form that is suitably normalised and approximately normal, such as 
 the log of TPM values (plus a suitable offset) or 
@@ -70,7 +75,7 @@ similar.
 
 \strong{Encoding covariates}
 
-If \code{x} is the name of...
+See the vignette.
 
 \strong{Convergence of variational inference}
 
