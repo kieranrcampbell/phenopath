@@ -14,20 +14,20 @@
 #' 
 #' @param exprs_obj Input gene expression, either
 #' \enumerate{
-#' \item An \linkS4class{SingleCellExperiment} object, \emph{or}
+#' \item An \linkS4class{SummarizedExperiment} object, \emph{or}
 #' \item A cell-by-gene matrix of normalised expression values in log form.
 #' }
 #' @param x The covariate vector, either
 #' \enumerate{
 #' \item The name of a column of \code{colData(exprs_obj)} if \code{exprs_obj} is an
-#' \code{SingleCellExperiment}, \emph{or}
+#' \code{SummarizedExperiment}, \emph{or}
 #' \item A numeric of factor vector of length equal to the 
 #' number of cells, \emph{or}
 #' \item A formula from which to build a model matrix from \code{colData(exprs_obj)}, 
-#' if \code{exprs_obj} is a \linkS4class{SingleCellExperiment}
+#' if \code{exprs_obj} is a \linkS4class{SummarizedExperiment}
 #' }
 #' @param sce_assay The assay from \code{exprs_obj} to use as expression if
-#' \code{exprs_object} is a \code{SingleCellExperiment}
+#' \code{exprs_object} is a \code{SummarizedExperiment}
 #' @param elbo_tol The relative pct change in the ELBO below 
 #' which is considered converged.
 #' See convergence section in details below.
@@ -54,7 +54,7 @@
 #' @details
 #' \strong{Input expression}
 #' 
-#' If an \code{SingleCellExperiment} is provided, \code{assay(exprs_obj, sce_assay)} 
+#' If an \code{SummarizedExperiment} is provided, \code{assay(exprs_obj, sce_assay)} 
 #' is used. 
 #' This is assumed to be in
 #' a form that is suitably normalised and approximately normal, such as 
@@ -108,7 +108,7 @@ phenopath <- function(exprs_obj, x, sce_assay = "exprs",
   xx <- NULL # Covariate matrix we'll actually use
   
   # Get expression input
-  if(is(exprs_obj, "SingleCellExperiment")) {
+  if(is(exprs_obj, "SummarizedExperiment")) {
     is_eset <- TRUE
     N <- ncol(exprs_obj)
     y <- t(assay(exprs_obj, sce_assay))
@@ -159,8 +159,8 @@ phenopath <- function(exprs_obj, x, sce_assay = "exprs",
     x_mat <- x_mat[,-1, drop = FALSE] # Remove intercept
     x_mat <- apply(x_mat, 2, scale_vec) # Centre scale values
   } else if(is(xx, "formula")) {
-    if(!is(exprs_obj, "SingleCellExperiment")) {
-      stop("If x is a formula, y must be an SingleCellExperiment")
+    if(!is(exprs_obj, "SummarizedExperiment")) {
+      stop("If x is a formula, y must be an SummarizedExperiment")
     }
     x_mat <- model.matrix(xx, colData(exprs_obj))
     x_mat <- x_mat[,-1, drop = FALSE] # Remove intercept

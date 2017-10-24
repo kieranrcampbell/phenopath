@@ -52,10 +52,11 @@ test_that("CAVI for CLVM has correctly sized outputs", {
 })
 
 
-test_that("phenopath() accepts SingleCellExperiments", {
+test_that("phenopath() accepts SummarizedExperiments", {
+  library(SummarizedExperiment)
   exprs_mat <- t(sim$y)
   pdata <- data.frame(x = sim$x)
-  sce <- SingleCellExperiment(assays = list(exprs = exprs_mat), 
+  sce <- SummarizedExperiment(assays = list(exprs = exprs_mat), 
                               colData = pdata)
   
   ## We'll test phenopath with three different x inputs:
