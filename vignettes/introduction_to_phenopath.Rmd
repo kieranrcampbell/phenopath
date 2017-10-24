@@ -182,7 +182,7 @@ ggplot(df_large, aes(x = z, y = y, color = x)) +
 
 ## Using an `SingleCellExperiment` as input
 
-Alternatively you might have expression values in an `SingleCellExperiment`. For single-cell data it is highly recommended to use the [scater](https://bioconductor.org/packages/release/bioc/html/singlecellexperiment.html)  in which case data is stored in a class derived from `SummarizedExperiment`.
+Alternatively you might have expression values in an `SingleCellExperiment`. For single-cell data it is highly recommended to use the [SingleCellExperiment](https://bioconductor.org/packages/release/bioc/html/singlecellexperiment.html)  in which case data is stored in a class derived from `SummarizedExperiment`.
 
 We'll first construct an example `SingleCellExperiment` using our previous simulation data:
 

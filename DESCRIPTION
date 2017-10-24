@@ -25,7 +25,6 @@ Suggests:
     rmarkdown,
     forcats,
     testthat,
-    scater,
     BiocStyle
 biocViews: RNASeq, GeneExpression, Bayesian, SingleCell, PrincipalComponent
 LinkingTo: Rcpp
