@@ -68,7 +68,7 @@ genes_to_extract <- c(1,3,11,13,21,23,31,33)
 expression_df <- as.data.frame(sim$y[,genes_to_extract])
 names(expression_df) <- paste0("gene_", genes_to_extract)
 
-df_gex <- tibble(expression_df) %>% 
+df_gex <- as_tibble(expression_df) %>% 
   mutate(x = factor(sim[['x']]), z = sim[['z']]) %>% 
   gather(gene, expression, -x, -z)
 
@@ -83,7 +83,7 @@ We see for the first two genes there is differential expression only, genes 3 an
 We can further plot this in PCA space, coloured by both covariate and pseudotime to get an idea of how these look in the reduced dimension:
 
 ```{r pcaing, fig.show = 'hold'}
-pca_df <- tibble(as.data.frame(prcomp(sim$y)$x[,1:2])) %>% 
+pca_df <- as_tibble(as.data.frame(prcomp(sim$y)$x[,1:2])) %>% 
   mutate(x = factor(sim[['x']]), z = sim[['z']])
 
 ggplot(pca_df, aes(x = PC1, y = PC2, color = x)) +
