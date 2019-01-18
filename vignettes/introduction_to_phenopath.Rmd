@@ -1,7 +1,7 @@
 ---
 title: "Introduction to PhenoPath"
 author: "Kieran R Campbell"
-date: "October 2017"
+date: "January 2019"
 output: BiocStyle::html_document
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
@@ -13,11 +13,14 @@ bibliography: bibliography.bib
 ```{r load-packages, include=FALSE}
 knitr::opts_chunk$set(fig.width = 5, fig.height = 3)
 
-suppressPackageStartupMessages(library(dplyr))
-suppressPackageStartupMessages(library(ggplot2))
-suppressPackageStartupMessages(library(tidyr))
-suppressPackageStartupMessages(library(forcats))
-library(phenopath)
+suppressPackageStartupMessages({
+  library(dplyr)
+  library(dplyr)
+  library(ggplot2)
+  library(tidyr)
+  library(forcats)
+  library(phenopath)
+})
 ```
 
 # Overview of PhenoPath
@@ -61,7 +64,11 @@ By default this simulates the model for $N= 100$ cells and $G=40$ genes.
 For 8 representative genes we can visualise what the expression looks like over pseudotime:
 
 ```{r some-genes, fig.width = 7}
-df_gex <- tbl_df(sim$y[,c(1,3,11,13,21,23,31,33)]) %>% 
+genes_to_extract <- c(1,3,11,13,21,23,31,33)
+expression_df <- as.data.frame(sim$y[,genes_to_extract])
+names(expression_df) <- paste0("gene_", genes_to_extract)
+
+df_gex <- tibble(expression_df) %>% 
   mutate(x = factor(sim[['x']]), z = sim[['z']]) %>% 
   gather(gene, expression, -x, -z)
 
@@ -76,7 +83,7 @@ We see for the first two genes there is differential expression only, genes 3 an
 We can further plot this in PCA space, coloured by both covariate and pseudotime to get an idea of how these look in the reduced dimension:
 
 ```{r pcaing, fig.show = 'hold'}
-pca_df <- tbl_df(prcomp(sim$y)$x[,1:2]) %>% 
+pca_df <- tibble(as.data.frame(prcomp(sim$y)$x[,1:2])) %>% 
   mutate(x = factor(sim[['x']]), z = sim[['z']])
 
 ggplot(pca_df, aes(x = PC1, y = PC2, color = x)) +
