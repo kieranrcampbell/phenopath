@@ -1,7 +1,7 @@
 Package: phenopath
 Type: Package
 Title: Genomic trajectories with heterogeneous genetic and environmental backgrounds
-Version: 1.7.3
+Version: 1.6.7
 Date: 2017-10-24
 Author: Kieran Campbell
 Maintainer: Kieran Campbell <kieranrcampbell@gmail.com>
